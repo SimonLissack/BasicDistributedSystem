@@ -4,6 +4,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebClient", "WebClient\WebC
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Infrastructure.Messaging.RabbitMq", "Infrastructure.Messaging.RabbitMq\Infrastructure.Messaging.RabbitMq.csproj", "{9CA578BD-8B10-418A-B3C7-C40AEF1C7AEB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Domain.Shared", "Domain.Shared\Domain.Shared.csproj", "{E9639B29-4392-42FB-9355-47633D7361C8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,9 @@ Global
 		{9CA578BD-8B10-418A-B3C7-C40AEF1C7AEB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9CA578BD-8B10-418A-B3C7-C40AEF1C7AEB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9CA578BD-8B10-418A-B3C7-C40AEF1C7AEB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E9639B29-4392-42FB-9355-47633D7361C8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E9639B29-4392-42FB-9355-47633D7361C8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E9639B29-4392-42FB-9355-47633D7361C8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E9639B29-4392-42FB-9355-47633D7361C8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
