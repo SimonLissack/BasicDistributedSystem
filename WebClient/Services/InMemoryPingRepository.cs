@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using WebClient.Models;
 
 namespace WebClient.Services;
@@ -12,7 +13,7 @@ public interface IPingRepository
 
 public class InMemoryPingRepository : IPingRepository
 {
-    readonly Dictionary<Guid, PingModel> _pings = new ();
+    readonly ConcurrentDictionary<Guid, PingModel> _pings = new ();
 
     public IEnumerable<PingModel> GetAll() => _pings.Values;
 
@@ -22,11 +23,7 @@ public class InMemoryPingRepository : IPingRepository
 
     public PingModel? DeleteModel(Guid id)
     {
-        if (TryGetModel(id, out var pingModel))
-        {
-            _pings.Remove(id);
-        }
-
-        return pingModel;
+        _pings.Remove(id, out var model);
+        return model;
     }
 }
