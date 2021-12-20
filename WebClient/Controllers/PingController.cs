@@ -48,4 +48,11 @@ public class PingController : ControllerBase
 
         return Ok(ping);
     }
+
+    [HttpDelete]
+    public IActionResult Delete(Guid id)
+    {
+        _pingRepository.DeleteModel(id);
+        return Ok();
+    }
 }
