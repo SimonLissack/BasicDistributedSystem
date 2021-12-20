@@ -1,4 +1,5 @@
 using Infrastructure.Messaging.RabbitMq;
+using WebClient.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,7 +24,8 @@ builder.Configuration.GetSection(nameof(RabbitMqConfiguration)).Bind(rabbitMqCon
 
 builder.Services
     .InstallRabbitMqInfrastructure(builder.Configuration)
-    .AddSingleton(rabbitMqConfig);
+    .AddSingleton(rabbitMqConfig)
+    .AddSingleton<IPingRepository>(new InMemoryPingRepository());
 
 var app = builder.Build();
 
