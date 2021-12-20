@@ -21,10 +21,10 @@ public class PingController : ControllerBase
         return Ok(_pingRepository.GetAll());
     }
 
-    [HttpGet("{id}")]
-    public IActionResult GetPing(string id)
+    [HttpGet("{id:guid}")]
+    public IActionResult GetPing(Guid id)
     {
-        if (_pingRepository.TryGetModel(Guid.Parse(id), out var pingModel))
+        if (_pingRepository.TryGetModel(id, out var pingModel))
         {
             return Ok(pingModel);
         }
