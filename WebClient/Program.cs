@@ -26,7 +26,7 @@ var webClientConfiguration = new WebClientConfiguration();
 builder.Configuration.GetSection(nameof(WebClientConfiguration)).Bind(webClientConfiguration);
 
 builder.Services
-    .InstallRabbitMqInfrastructure(builder.Configuration)
+    .InstallRabbitMqInfrastructure()
     .AddSingleton(rabbitMqConfig)
     .AddSingleton(webClientConfiguration)
     .AddSingleton<IPingRepository>(new InMemoryPingRepository())

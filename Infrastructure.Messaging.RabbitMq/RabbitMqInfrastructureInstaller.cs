@@ -5,10 +5,9 @@ namespace Infrastructure.Messaging.RabbitMq;
 
 public static class RabbitMqInfrastructureInstaller
 {
-    public static IServiceCollection InstallRabbitMqInfrastructure(this IServiceCollection serviceCollection, IConfiguration configuration)
+    public static IServiceCollection InstallRabbitMqInfrastructure(this IServiceCollection serviceCollection)
     {
         serviceCollection
-            .AddSingleton(configuration.Get<RabbitMqConfiguration>())
             .AddSingleton<IRabbitMqChannelFactory, RabbitMqChannelSingletonFactory>();
 
         return serviceCollection;
