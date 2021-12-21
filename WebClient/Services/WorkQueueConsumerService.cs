@@ -1,5 +1,5 @@
 using System.Net.Mime;
-using System.Text.Json;
+using Domain.Shared;
 using Domain.Shared.Models;
 using Infrastructure.Messaging.RabbitMq;
 using RabbitMQ.Client;
@@ -42,11 +42,11 @@ public class WorkQueueConsumerService : IHostedService
                 switch (ea.BasicProperties.Type)
                 {
                     case nameof(AcceptedResponse):
-                        var acceptedResponse = DeserializeMessage<AcceptedResponse>(ea.Body.ToArray());
+                        var acceptedResponse = ea.Body.ToArray().DeserializeMessage<AcceptedResponse>();
                         UpdateModel(acceptedResponse.Id, m => m.AcceptedByWorkerAt = acceptedResponse.AcceptedAt);
                         break;
                     case nameof(ProcessingCompletedResponse):
-                        var processingCompletedResponse = DeserializeMessage<ProcessingCompletedResponse>(ea.Body.ToArray());
+                        var processingCompletedResponse = ea.Body.ToArray().DeserializeMessage<ProcessingCompletedResponse>();
                         UpdateModel(processingCompletedResponse.Id, m =>
                         {
                             m.CompletedByWorkerAt = processingCompletedResponse.CompletedAt;
@@ -64,8 +64,6 @@ public class WorkQueueConsumerService : IHostedService
         );
 
         return Task.CompletedTask;
-
-        T DeserializeMessage<T>(byte[] body) => JsonSerializer.Deserialize<T>(body)!;
     }
 
     void UpdateModel(Guid id, Action<PingModel> update)
