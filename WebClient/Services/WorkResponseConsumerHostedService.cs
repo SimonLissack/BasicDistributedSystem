@@ -8,14 +8,14 @@ using WebClient.Models;
 
 namespace WebClient.Services;
 
-public class WorkQueueConsumerService : IHostedService
+public class WorkResponseConsumerHostedService : IHostedService
 {
-    readonly ILogger<WorkQueueConsumerService> _logger;
+    readonly ILogger<WorkResponseConsumerHostedService> _logger;
     readonly IRabbitMqChannelFactory _channelFactory;
     readonly IPingRepository _pingRepository;
     EventingBasicConsumer? _consumer;
 
-    public WorkQueueConsumerService(ILogger<WorkQueueConsumerService> logger, IRabbitMqChannelFactory channelFactory, IPingRepository pingRepository)
+    public WorkResponseConsumerHostedService(ILogger<WorkResponseConsumerHostedService> logger, IRabbitMqChannelFactory channelFactory, IPingRepository pingRepository)
     {
         _logger = logger;
         _channelFactory = channelFactory;
