@@ -14,7 +14,6 @@ public class WorkResponseConsumerHostedService : IHostedService
     readonly IRabbitMqChannelFactory _channelFactory;
     readonly IPingRepository _pingRepository;
     readonly WebClientConfiguration _webClientConfiguration;
-    EventingBasicConsumer? _consumer;
 
     public WorkResponseConsumerHostedService(ILogger<WorkResponseConsumerHostedService> logger, IRabbitMqChannelFactory channelFactory, IPingRepository pingRepository, WebClientConfiguration webClientConfiguration)
     {
@@ -34,9 +33,10 @@ public class WorkResponseConsumerHostedService : IHostedService
             false
         );
 
-        _consumer = new EventingBasicConsumer(channel);
 
-        _consumer.Received += (_, ea) =>
+        var consumer = new AsyncEventingBasicConsumer(channel);
+
+        consumer.Received += (_, ea) =>
         {
             _logger.LogInformation(
                 "Received message from response queue {ResponseQueueName} Content type: {ContentType} Type: {Type}",
@@ -63,11 +63,13 @@ public class WorkResponseConsumerHostedService : IHostedService
                         break;
                 }
             }
+
+            return Task.CompletedTask;
         };
 
         _channelFactory.GetChannel().BasicConsume(
             _webClientConfiguration.ResponseQueueName,
-            consumer: _consumer,
+            consumer: consumer,
             autoAck: true
         );
 
