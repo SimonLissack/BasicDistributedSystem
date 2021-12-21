@@ -13,18 +13,26 @@ public class WorkResponseConsumerHostedService : IHostedService
     readonly ILogger<WorkResponseConsumerHostedService> _logger;
     readonly IRabbitMqChannelFactory _channelFactory;
     readonly IPingRepository _pingRepository;
+    readonly WebClientConfiguration _webClientConfiguration;
     EventingBasicConsumer? _consumer;
 
-    public WorkResponseConsumerHostedService(ILogger<WorkResponseConsumerHostedService> logger, IRabbitMqChannelFactory channelFactory, IPingRepository pingRepository)
+    public WorkResponseConsumerHostedService(ILogger<WorkResponseConsumerHostedService> logger, IRabbitMqChannelFactory channelFactory, IPingRepository pingRepository, WebClientConfiguration webClientConfiguration)
     {
         _logger = logger;
         _channelFactory = channelFactory;
         _pingRepository = pingRepository;
+        _webClientConfiguration = webClientConfiguration;
     }
 
     public Task StartAsync(CancellationToken cancellationToken)
     {
         var channel = _channelFactory.GetChannel();
+
+        channel.QueueDeclare(
+            _webClientConfiguration.ResponseQueueName,
+            false,
+            false
+        );
 
         _consumer = new EventingBasicConsumer(channel);
 
@@ -32,7 +40,7 @@ public class WorkResponseConsumerHostedService : IHostedService
         {
             _logger.LogInformation(
                 "Received message from response queue {ResponseQueueName} Content type: {ContentType} Type: {Type}",
-                _channelFactory.ResponseQueueName,
+                _webClientConfiguration.ResponseQueueName,
                 ea.BasicProperties.ContentType,
                 ea.BasicProperties.Type
             );
@@ -58,7 +66,7 @@ public class WorkResponseConsumerHostedService : IHostedService
         };
 
         _channelFactory.GetChannel().BasicConsume(
-            _channelFactory.ResponseQueueName,
+            _webClientConfiguration.ResponseQueueName,
             consumer: _consumer,
             autoAck: true
         );
@@ -78,9 +86,9 @@ public class WorkResponseConsumerHostedService : IHostedService
 
     public Task StopAsync(CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Cleaning up queue {ResponseQueueName}", _channelFactory.ResponseQueueName);
+        _logger.LogInformation("Cleaning up queue {ResponseQueueName}", _webClientConfiguration.ResponseQueueName);
 
-        _channelFactory.GetChannel().QueueDelete(_channelFactory.ResponseQueueName, false, false);
+        _channelFactory.GetChannel().QueueDelete(_webClientConfiguration.ResponseQueueName, false, false);
 
         return Task.CompletedTask;
     }

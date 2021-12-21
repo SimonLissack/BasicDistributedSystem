@@ -15,16 +15,19 @@ public class WorkRequestPublisherService : IWorkRequestPublisherService
     readonly ILogger<WorkRequestPublisherService> _logger;
     readonly IRabbitMqChannelFactory _channelFactory;
     readonly RabbitMqConfiguration _configuration;
+    readonly WebClientConfiguration _webClientConfiguration;
 
-    public WorkRequestPublisherService(ILogger<WorkRequestPublisherService> logger, IRabbitMqChannelFactory channelFactory, RabbitMqConfiguration configuration)
+    public WorkRequestPublisherService(ILogger<WorkRequestPublisherService> logger, IRabbitMqChannelFactory channelFactory, RabbitMqConfiguration configuration, WebClientConfiguration webClientConfiguration)
     {
         _logger = logger;
         _channelFactory = channelFactory;
         _configuration = configuration;
+        _webClientConfiguration = webClientConfiguration;
     }
 
     public void PublishWorkRequest(Guid id, int delayInSeconds)
     {
+        _logger.LogInformation("Publishing work request for {Id}", id);
         var channel = _channelFactory.GetChannel();
         var properties = channel.CreateJsonBasicProperties<RequestWork>();
 
@@ -34,7 +37,7 @@ public class WorkRequestPublisherService : IWorkRequestPublisherService
             DelayInSeconds = delayInSeconds
         }.SerializeToMessage();
 
-        properties.ReplyTo = _channelFactory.ResponseQueueName;
+        properties.ReplyTo = _webClientConfiguration.ResponseQueueName;
 
         channel.BasicPublish(
             _configuration.WorkQueueName,

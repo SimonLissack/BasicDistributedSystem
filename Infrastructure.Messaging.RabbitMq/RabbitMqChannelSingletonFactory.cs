@@ -4,7 +4,6 @@ namespace Infrastructure.Messaging.RabbitMq;
 
 public interface IRabbitMqChannelFactory
 {
-    string? ResponseQueueName { get; }
     IModel GetChannel();
 }
 
@@ -12,8 +11,6 @@ public class RabbitMqChannelSingletonFactory : IRabbitMqChannelFactory
 {
     readonly RabbitMqConfiguration _configuration;
     IModel? _channel;
-
-    public string? ResponseQueueName { get; private set; }
 
     public RabbitMqChannelSingletonFactory(RabbitMqConfiguration configuration)
     {
@@ -32,7 +29,6 @@ public class RabbitMqChannelSingletonFactory : IRabbitMqChannelFactory
         _channel = factory.CreateConnection().CreateModel();
 
         _channel.QueueDeclare(_configuration.WorkQueueName, exclusive: false, autoDelete: false);
-        ResponseQueueName = _channel.QueueDeclare(exclusive: false, autoDelete: true).QueueName;
 
         return _channel;
     }
