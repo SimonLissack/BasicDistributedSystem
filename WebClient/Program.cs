@@ -1,4 +1,5 @@
 using Infrastructure.Messaging.RabbitMq;
+using WebClient;
 using WebClient.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -21,10 +22,13 @@ builder.Configuration
 
 var rabbitMqConfig = new RabbitMqConfiguration();
 builder.Configuration.GetSection(nameof(RabbitMqConfiguration)).Bind(rabbitMqConfig);
+var webClientConfiguration = new WebClientConfiguration();
+builder.Configuration.GetSection(nameof(WebClientConfiguration)).Bind(webClientConfiguration);
 
 builder.Services
     .InstallRabbitMqInfrastructure(builder.Configuration)
     .AddSingleton(rabbitMqConfig)
+    .AddSingleton(webClientConfiguration)
     .AddSingleton<IPingRepository>(new InMemoryPingRepository())
     .AddTransient<IWorkRequestPublisherService, WorkRequestPublisherService>()
     .AddHostedService<WorkResponseConsumerHostedService>();
