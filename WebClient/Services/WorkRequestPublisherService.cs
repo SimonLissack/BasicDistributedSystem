@@ -40,7 +40,7 @@ public class WorkRequestPublisherService : IWorkRequestPublisherService
         properties.ReplyTo = _webClientConfiguration.ResponseQueueName;
 
         channel.BasicPublish(
-            _configuration.WorkQueueName,
+            _configuration.ExchangeName,
             nameof(RequestWork),
             properties,
             body
