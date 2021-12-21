@@ -8,14 +8,14 @@ using WebClient.Models;
 
 namespace WebClient.Services;
 
-public class WorkQueueResponseService : IHostedService
+public class WorkQueueConsumerService : IHostedService
 {
-    readonly ILogger<WorkQueueResponseService> _logger;
+    readonly ILogger<WorkQueueConsumerService> _logger;
     readonly IRabbitMqChannelFactory _channelFactory;
     readonly IPingRepository _pingRepository;
-    EventingBasicConsumer _consumer;
+    EventingBasicConsumer? _consumer;
 
-    public WorkQueueResponseService(ILogger<WorkQueueResponseService> logger, IRabbitMqChannelFactory channelFactory, IPingRepository pingRepository)
+    public WorkQueueConsumerService(ILogger<WorkQueueConsumerService> logger, IRabbitMqChannelFactory channelFactory, IPingRepository pingRepository)
     {
         _logger = logger;
         _channelFactory = channelFactory;
@@ -77,7 +77,6 @@ public class WorkQueueResponseService : IHostedService
         }
         _logger.LogWarning("Could not find model with id {Id}", id);
     }
-
 
     public Task StopAsync(CancellationToken cancellationToken)
     {
