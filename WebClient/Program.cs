@@ -26,7 +26,8 @@ builder.Services
     .InstallRabbitMqInfrastructure(builder.Configuration)
     .AddSingleton(rabbitMqConfig)
     .AddSingleton<IPingRepository>(new InMemoryPingRepository())
-    .AddHostedService<WorkQueueConsumerService>();
+    .AddTransient<IWorkRequestPublisherService, WorkRequestPublisherService>()
+    .AddHostedService<WorkResponseConsumerHostedService>();
 
 var app = builder.Build();
 
