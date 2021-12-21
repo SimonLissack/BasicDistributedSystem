@@ -6,6 +6,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Infrastructure.Messaging.Ra
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Domain.Shared", "Domain.Shared\Domain.Shared.csproj", "{E9639B29-4392-42FB-9355-47633D7361C8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Worker", "Worker\Worker.csproj", "{C97E5EF1-97F3-4B74-AF42-38B4F832C471}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,5 +26,9 @@ Global
 		{E9639B29-4392-42FB-9355-47633D7361C8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E9639B29-4392-42FB-9355-47633D7361C8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E9639B29-4392-42FB-9355-47633D7361C8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C97E5EF1-97F3-4B74-AF42-38B4F832C471}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C97E5EF1-97F3-4B74-AF42-38B4F832C471}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C97E5EF1-97F3-4B74-AF42-38B4F832C471}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C97E5EF1-97F3-4B74-AF42-38B4F832C471}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
