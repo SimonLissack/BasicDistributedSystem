@@ -64,7 +64,14 @@ public class WorkResponseConsumerHostedService : IHostedService
                             m.CompletedAt = DateTime.UtcNow;
                         });
                         break;
+                    default:
+                        _logger.LogWarning("Unknown message type: {Type}", ea.BasicProperties.Type);
+                        break;
                 }
+            }
+            else
+            {
+                _logger.LogWarning("Unknown content type: {ContentType}", ea.BasicProperties.ContentType);
             }
 
             return Task.CompletedTask;
