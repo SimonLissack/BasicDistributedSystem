@@ -24,11 +24,14 @@ public class RabbitMqChannelSingletonFactory : IRabbitMqChannelFactory
             return _channel;
         }
 
-        var factory = new ConnectionFactory { HostName = _configuration.HostName, Port = _configuration.PortNumber};
+        var factory = new ConnectionFactory { HostName = _configuration.HostName, Port = _configuration.PortNumber };
 
         _channel = factory.CreateConnection().CreateModel();
 
+        _channel.ExchangeDeclare(_configuration.ExchangeName, ExchangeType.Direct);
         _channel.QueueDeclare(_configuration.WorkQueueName, exclusive: false, autoDelete: false);
+
+        _channel.QueueBind(_configuration.WorkQueueName, _configuration.ExchangeName, RoutingKeys.WorkRequestRoutingKeys);
 
         return _channel;
     }

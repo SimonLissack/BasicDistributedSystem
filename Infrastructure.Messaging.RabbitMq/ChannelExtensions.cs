@@ -13,4 +13,12 @@ public static class ChannelExtensions
 
         return properties;
     }
+
+    public static void QueueBind(this IModel channel, string queueName, string exchangeName, params string[] routingKeys)
+    {
+        foreach (var workRequestRoutingKey in RoutingKeys.WorkRequestRoutingKeys)
+        {
+            IModelExensions.QueueBind(channel, queueName, exchangeName, workRequestRoutingKey);
+        }
+    }
 }
