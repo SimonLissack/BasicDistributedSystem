@@ -14,13 +14,15 @@ public class WorkResponseConsumerHostedService : IHostedService
     readonly IRabbitMqChannelFactory _channelFactory;
     readonly IPingRepository _pingRepository;
     readonly WebClientConfiguration _webClientConfiguration;
+    readonly RabbitMqConfiguration _rabbitMqConfiguration;
 
-    public WorkResponseConsumerHostedService(ILogger<WorkResponseConsumerHostedService> logger, IRabbitMqChannelFactory channelFactory, IPingRepository pingRepository, WebClientConfiguration webClientConfiguration)
+    public WorkResponseConsumerHostedService(ILogger<WorkResponseConsumerHostedService> logger, IRabbitMqChannelFactory channelFactory, IPingRepository pingRepository, WebClientConfiguration webClientConfiguration, RabbitMqConfiguration rabbitMqConfiguration)
     {
         _logger = logger;
         _channelFactory = channelFactory;
         _pingRepository = pingRepository;
         _webClientConfiguration = webClientConfiguration;
+        _rabbitMqConfiguration = rabbitMqConfiguration;
     }
 
     public Task StartAsync(CancellationToken cancellationToken)
@@ -33,6 +35,7 @@ public class WorkResponseConsumerHostedService : IHostedService
             false
         );
 
+        channel.QueueBind(_webClientConfiguration.ResponseQueueName, _rabbitMqConfiguration.ExchangeName, _webClientConfiguration.ResponseQueueName);
 
         var consumer = new AsyncEventingBasicConsumer(channel);
 
