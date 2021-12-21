@@ -12,6 +12,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\Domain.Shared\Domain.Shared.csproj" />
       <ProjectReference Include="..\Infrastructure.Messaging.RabbitMq\Infrastructure.Messaging.RabbitMq.csproj" />
     </ItemGroup>
 

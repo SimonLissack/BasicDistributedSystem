@@ -25,7 +25,8 @@ builder.Configuration.GetSection(nameof(RabbitMqConfiguration)).Bind(rabbitMqCon
 builder.Services
     .InstallRabbitMqInfrastructure(builder.Configuration)
     .AddSingleton(rabbitMqConfig)
-    .AddSingleton<IPingRepository>(new InMemoryPingRepository());
+    .AddSingleton<IPingRepository>(new InMemoryPingRepository())
+    .AddHostedService<WorkQueueResponseService>();
 
 var app = builder.Build();
 
