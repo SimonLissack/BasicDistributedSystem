@@ -9,10 +9,12 @@ namespace WebClient.Controllers;
 public class PingController : ControllerBase
 {
     readonly IPingRepository _pingRepository;
+    readonly IWorkRequestPublisherService _publisherService;
 
-    public PingController(IPingRepository pingRepository)
+    public PingController(IPingRepository pingRepository, IWorkRequestPublisherService publisherService)
     {
         _pingRepository = pingRepository;
+        _publisherService = publisherService;
     }
 
     [HttpGet]
@@ -44,7 +46,7 @@ public class PingController : ControllerBase
 
         _pingRepository.SaveModel(ping);
 
-        // Send to queue
+        _publisherService.PublishWorkRequest(ping.Id, ping.DelayInSeconds);
 
         return Ok(ping);
     }
