@@ -1,0 +1,7 @@
+FROM mcr.microsoft.com/dotnet/aspnet:6.0
+
+ARG PUBLISH_DIR
+
+COPY $PUBLISH_DIR App/
+WORKDIR /App
+ENTRYPOINT ["dotnet", "WebClient.dll"]
