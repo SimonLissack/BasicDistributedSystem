@@ -18,7 +18,7 @@ Console.WriteLine($"Host:\t{rabbitMqConfiguration.HostName}:{rabbitMqConfigurati
 Console.WriteLine($"Queue:\t{rabbitMqConfiguration.WorkQueueName}");
 Console.WriteLine($"Exchange:\t{rabbitMqConfiguration.ExchangeName}");
 
-var channel = host.Services.GetService<IRabbitMqChannelFactory>()!.GetChannel();
+var channel = await host.Services.GetService<IRabbitMqChannelFactory>()!.GetChannel();
 
 channel.BasicQos(0, 1, false);
 
@@ -61,8 +61,11 @@ consumer.Received += async (_, ea) =>
 
 channel.BasicConsume(rabbitMqConfiguration.WorkQueueName, false, consumer);
 
-Console.WriteLine("Press [Enter] to exit");
-Console.ReadLine();
+while (true)
+{
+    Console.WriteLine("Wait loop running");
+    await Task.Delay(30000);
+}
 
 IHost ConfigureHost() => Host.CreateDefaultBuilder(args)
     .ConfigureHostConfiguration(c => c

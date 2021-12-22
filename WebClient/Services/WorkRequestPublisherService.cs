@@ -7,7 +7,7 @@ namespace WebClient.Services;
 
 public interface IWorkRequestPublisherService
 {
-    void PublishWorkRequest(Guid id, int delayInSeconds);
+    Task PublishWorkRequest(Guid id, int delayInSeconds);
 }
 
 public class WorkRequestPublisherService : IWorkRequestPublisherService
@@ -25,10 +25,10 @@ public class WorkRequestPublisherService : IWorkRequestPublisherService
         _webClientConfiguration = webClientConfiguration;
     }
 
-    public void PublishWorkRequest(Guid id, int delayInSeconds)
+    public async Task PublishWorkRequest(Guid id, int delayInSeconds)
     {
         _logger.LogInformation("Publishing work request for {Id}", id);
-        var channel = _channelFactory.GetChannel();
+        var channel = await _channelFactory.GetChannel();
         var properties = channel.CreateJsonBasicProperties<RequestWork>();
 
         var body = new RequestWork

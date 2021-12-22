@@ -25,9 +25,9 @@ public class WorkResponseConsumerHostedService : IHostedService
         _rabbitMqConfiguration = rabbitMqConfiguration;
     }
 
-    public Task StartAsync(CancellationToken cancellationToken)
+    public async Task StartAsync(CancellationToken cancellationToken)
     {
-        var channel = _channelFactory.GetChannel();
+        var channel = await _channelFactory.GetChannel();
 
         channel.QueueDeclare(
             _webClientConfiguration.ResponseQueueName,
@@ -77,13 +77,11 @@ public class WorkResponseConsumerHostedService : IHostedService
             return Task.CompletedTask;
         };
 
-        _channelFactory.GetChannel().BasicConsume(
+        channel.BasicConsume(
             _webClientConfiguration.ResponseQueueName,
             consumer: consumer,
             autoAck: true
         );
-
-        return Task.CompletedTask;
     }
 
     void UpdateModel(Guid id, Action<PingModel> update)
@@ -96,12 +94,12 @@ public class WorkResponseConsumerHostedService : IHostedService
         _logger.LogWarning("Could not find model with id {Id}", id);
     }
 
-    public Task StopAsync(CancellationToken cancellationToken)
+    public async Task StopAsync(CancellationToken cancellationToken)
     {
         _logger.LogInformation("Cleaning up queue {ResponseQueueName}", _webClientConfiguration.ResponseQueueName);
 
-        _channelFactory.GetChannel().QueueDelete(_webClientConfiguration.ResponseQueueName, false, false);
+        var channel = await _channelFactory.GetChannel();
 
-        return Task.CompletedTask;
+        channel.QueueDelete(_webClientConfiguration.ResponseQueueName, false, false);
     }
 }
