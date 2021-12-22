@@ -16,7 +16,7 @@ builder.Logging.AddConsole();
 
 builder.Configuration
     .SetBasePath(builder.Environment.ContentRootPath)
-    .AddJsonFile("appsettings.json")
+    .AddJsonFile("appsettings.json", true)
     .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", true)
     .AddEnvironmentVariables();
 

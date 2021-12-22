@@ -68,7 +68,7 @@ IHost ConfigureHost() => Host.CreateDefaultBuilder(args)
     .ConfigureHostConfiguration(c => c
         .SetBasePath(Environment.CurrentDirectory)
         .AddEnvironmentVariables()
-        .AddJsonFile("appsettings.json")
+        .AddJsonFile("appsettings.json", true)
     ).ConfigureServices((hostContext, serviceCollection) =>
         {
             var rabbitMqConfig = new RabbitMqConfiguration();
