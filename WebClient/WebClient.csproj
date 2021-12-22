@@ -15,4 +15,8 @@
       <ProjectReference Include="..\Infrastructure.Messaging.RabbitMq\Infrastructure.Messaging.RabbitMq.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+        <Content Update="appsettings.Development.json" CopyToPublishDirectory="Never" />
+    </ItemGroup>
+
 </Project>
