@@ -1,4 +1,4 @@
-# Basic Micro Service project
+# Basic distributed system project
 
 The intent of this project is to investigate deploying and running a small distributed system using [Docker](https://www.docker.com/)/[Kubernetes](https://kubernetes.io/).
 
