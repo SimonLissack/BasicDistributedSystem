@@ -56,6 +56,10 @@ Web Client:
 
 ### Compose
 
+Compose will build the `WebClient` and `Worker` images, so the entire process can be run in a single step:
+
+`docker compose up`
+
 TODO:
 1. ~~Run services on docker~~
 2. Run services on kubernetes
