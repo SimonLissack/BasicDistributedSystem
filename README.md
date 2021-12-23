@@ -44,7 +44,7 @@ The reply queue for the `WebClient` is managed solely by the `WebClient` itself.
 
 ### Build
 
-The docker file will publish the dotnet project and build the container. The path for the build must be the `src` directory:
+The docker file will publish the dotnet project and build the container. The path for the build must be the `src` directory (this was the easiest way I found to build/publish when referencing multiple csproj projects):
 
 Worker:
 
