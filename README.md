@@ -39,6 +39,22 @@ When either a `Worker` or a `WebClient` roles is started and begins to publish o
 The reply queue for the `WebClient` is managed solely by the `WebClient` itself. It will be deleted when the `WebClient` stops.
 
 # Deployment
+## Docker
+
+### Build
+
+The docker file will publish the dotnet project and build the container. The path for the build must be the `src` directory:
+
+Worker:
+
+`docker build -t bds-worker -f src/Worker/Dockerfile ./src`
+
+Web Client:
+
+`docker build -t bds-webclient -f src/WebClient/Dockerfile ./src`
+
+### Compose
+
 TODO:
 1. Run services on docker
 2. Run services on kubernetes

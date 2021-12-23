@@ -1,8 +1,8 @@
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build-webclient
-WORKDIR /App
+WORKDIR /src
 
 copy . ./
-RUN dotnet publish -c Release -o published
+RUN dotnet publish WebClient -c Release -o /App/published
 
 FROM mcr.microsoft.com/dotnet/aspnet:6.0 as docker-webclient
 WORKDIR /App
