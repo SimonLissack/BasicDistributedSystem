@@ -6,7 +6,9 @@ services:
       - 5672:5672
       - 15672:15672
   bds-webclient:
-    image: bms-webclient
+    build:
+      context: ./src
+      dockerfile: ./WebClient/Dockerfile
     depends_on:
       - bds-rabbitmq
     env_file:
@@ -14,7 +16,9 @@ services:
     ports:
       - 5000:80
   bds-worker:
-    image: bms-worker
+    build:
+      context: ./src
+      dockerfile: ./Worker/Dockerfile
     depends_on:
       - bds-rabbitmq
     env_file:

@@ -39,6 +39,7 @@ When either a `Worker` or a `WebClient` roles is started and begins to publish o
 The reply queue for the `WebClient` is managed solely by the `WebClient` itself. It will be deleted when the `WebClient` stops.
 
 # Deployment
+
 ## Docker
 
 ### Build
@@ -56,6 +57,6 @@ Web Client:
 ### Compose
 
 TODO:
-1. Run services on docker
+1. ~~Run services on docker~~
 2. Run services on kubernetes
 3. Get kubernetes to autoscale based on worker queue depth (using KEDA?)
