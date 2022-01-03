@@ -11,7 +11,7 @@ services:
     depends_on:
       - bds-rabbitmq
     env_file:
-      - rabbitmq_configuration.env
+      - rabbitmq-configuration.env
     ports:
       - 5000:80
   bds-worker:
@@ -21,4 +21,4 @@ services:
     depends_on:
       - bds-rabbitmq
     env_file:
-      - rabbitmq_configuration.env
+      - rabbitmq-configuration.env
