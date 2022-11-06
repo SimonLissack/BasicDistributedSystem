@@ -21,14 +21,6 @@
         "RabbitMqConfiguration__ExchangeName": "bms_exchange",
         "RabbitMqConfiguration__HostName": "localhost"
       }
-    },
-    "IIS Express": {
-      "commandName": "IISExpress",
-      "launchBrowser": true,
-      "launchUrl": "swagger",
-      "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
-      }
     }
   }
 }
