@@ -32,7 +32,9 @@ public class RabbitMqChannelSingletonFactory : IRabbitMqChannelFactory
         {
             HostName = _configuration.HostName,
             Port = _configuration.PortNumber,
-            DispatchConsumersAsync = true
+            DispatchConsumersAsync = true,
+            UserName = _configuration.UserName ?? ConnectionFactory.DefaultPass,
+            Password = _configuration.Password ?? ConnectionFactory.DefaultPass
         };
 
         var connection = await ConnectAndRetryOnFailure(factory);
