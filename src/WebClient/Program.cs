@@ -33,6 +33,10 @@ builder.Services
     .AddTransient<IWorkRequestPublisherService, WorkRequestPublisherService>()
     .AddHostedService<WorkResponseConsumerHostedService>();
 
+Console.WriteLine($"[RabbitMQ] Host: {rabbitMqConfig.HostName}:{rabbitMqConfig.PortNumber}");
+Console.WriteLine($"[RabbitMQ] Exchange name: {rabbitMqConfig.ExchangeName}");
+Console.WriteLine($"[RabbitMQ] Work queue name: {rabbitMqConfig.WorkQueueName}");
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
