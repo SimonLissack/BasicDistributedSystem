@@ -1,11 +1,11 @@
 using Infrastructure.Messaging.RabbitMq;
-using OpenTelemetry.Logs;
+using Infrastructure.Telemetry;
 using OpenTelemetry.Resources;
 using WebClient;
 using WebClient.Services;
 
-const string ServiceName = "bds-web";
-var otelResourceBuilder = ResourceBuilder.CreateDefault().AddService(ServiceName);
+const string serviceName = "bds-web";
+var otelResourceBuilder = ResourceBuilder.CreateDefault().AddService(serviceName);
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,8 +16,9 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Logging.ClearProviders();
-builder.Logging.AddOpenTelemetry(o => o.AddConsoleExporter().SetResourceBuilder(otelResourceBuilder));
+builder.Logging
+    .ClearProviders()
+    .AddOpenTelemetryLogging(otelResourceBuilder);
 
 builder.Configuration
     .SetBasePath(builder.Environment.ContentRootPath)
