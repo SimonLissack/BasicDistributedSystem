@@ -7,8 +7,6 @@ using Worker;
 
 var host = ConfigureHost();
 
-Console.WriteLine("Starting worker role");
-
 IHost ConfigureHost() => Host.CreateDefaultBuilder(args)
     .ConfigureHostConfiguration(c => c
         .SetBasePath(Environment.CurrentDirectory)

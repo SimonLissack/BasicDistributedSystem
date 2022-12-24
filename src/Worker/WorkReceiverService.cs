@@ -2,6 +2,7 @@ using System.Net.Mime;
 using Domain.Shared;
 using Domain.Shared.Models;
 using Infrastructure.Messaging.RabbitMq;
+using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
@@ -9,12 +10,14 @@ namespace Worker;
 
 public class WorkReceiverService
 {
+    readonly ILogger<WorkReceiverService> _logger;
     readonly RabbitMqConfiguration _rabbitMqConfiguration;
     readonly IRabbitMqChannelFactory _rabbitMqChannelFactory;
     readonly ConsoleCancellationTokenSourceFactory _cancellationTokenSourceFactory;
 
-    public WorkReceiverService(RabbitMqConfiguration rabbitMqConfiguration, IRabbitMqChannelFactory rabbitMqChannelFactory, ConsoleCancellationTokenSourceFactory cancellationTokenSourceFactory)
+    public WorkReceiverService(ILogger<WorkReceiverService> logger, RabbitMqConfiguration rabbitMqConfiguration, IRabbitMqChannelFactory rabbitMqChannelFactory, ConsoleCancellationTokenSourceFactory cancellationTokenSourceFactory)
     {
+        _logger = logger;
         _rabbitMqConfiguration = rabbitMqConfiguration;
         _rabbitMqChannelFactory = rabbitMqChannelFactory;
         _cancellationTokenSourceFactory = cancellationTokenSourceFactory;
@@ -22,9 +25,10 @@ public class WorkReceiverService
 
     public async Task StartAsync()
     {
-        Console.WriteLine($"Host:\t{_rabbitMqConfiguration.HostName}:{_rabbitMqConfiguration.PortNumber}");
-        Console.WriteLine($"Queue:\t{_rabbitMqConfiguration.WorkQueueName}");
-        Console.WriteLine($"Exchange:\t{_rabbitMqConfiguration.ExchangeName}");
+        _logger.LogInformation("Starting worker");
+        _logger.LogInformation("Host:\t{HostName}:{PortNumber}", _rabbitMqConfiguration.HostName, _rabbitMqConfiguration.PortNumber);
+        _logger.LogInformation("Queue:\t{WorkQueueName}", _rabbitMqConfiguration.WorkQueueName);
+        _logger.LogInformation("Exchange:\t{ExchangeName}", _rabbitMqConfiguration.ExchangeName);
 
         var cancellationToken = _cancellationTokenSourceFactory.Create();
 
@@ -43,16 +47,16 @@ public class WorkReceiverService
 
         consumer.Received += async (_, ea) =>
         {
-            Console.WriteLine($"[x] Message received");
+            _logger.LogInformation("Message received");
             if (ea.BasicProperties is not { ContentType: MediaTypeNames.Application.Json, Type: nameof(RequestWork) } && string.IsNullOrEmpty(ea.BasicProperties.ReplyTo))
             {
-                Console.WriteLine($"[x] Could not process message");
+                _logger.LogInformation("Could not process message");
                 Ack();
                 return;
             }
 
             var body = ea.Body.ToArray().DeserializeMessage<RequestWork>();
-            Console.WriteLine($"[x] Processing message for {body.Id}");
+            _logger.LogInformation("Processing message for {BodyId}", body.Id);
             channel.ReplyToMessage(_rabbitMqConfiguration, ea.BasicProperties.ReplyTo, new AcceptedResponse
             {
                 Id = body.Id,
@@ -61,7 +65,7 @@ public class WorkReceiverService
 
             var delayInMilliseconds = body.DelayInSeconds >= 0 ? body.DelayInSeconds * 1000 : 0;
 
-            Console.WriteLine($"[x] Waiting for {delayInMilliseconds}ms");
+            _logger.LogInformation("Waiting for {DelayInMilliseconds}ms", delayInMilliseconds);
             await Task.Delay(delayInMilliseconds);
 
             channel.ReplyToMessage(_rabbitMqConfiguration, ea.BasicProperties.ReplyTo, new ProcessingCompletedResponse
@@ -71,7 +75,7 @@ public class WorkReceiverService
             });
 
             Ack();
-            Console.WriteLine($"[x] Completed processing message for {body.Id}");
+            _logger.LogInformation("Completed processing message for {BodyId}", body.Id);
 
             void Ack() => channel.BasicAck(ea.DeliveryTag, false);
         };
