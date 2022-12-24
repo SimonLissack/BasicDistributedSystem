@@ -1,9 +1,14 @@
 ﻿using Infrastructure.Messaging.RabbitMq;
+using Infrastructure.Telemetry;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using OpenTelemetry.Resources;
 using Worker;
+
+const string serviceName = "bds-worker";
+var otelResourceBuilder = ResourceBuilder.CreateDefault().AddService(serviceName);
 
 var host = ConfigureHost();
 
@@ -24,7 +29,10 @@ IHost ConfigureHost() => Host.CreateDefaultBuilder(args)
                 .AddTransient<ConsoleCancellationTokenSourceFactory>();
         }
     )
-    .ConfigureLogging(builder => builder.AddSimpleConsole())
+    .ConfigureLogging(builder => builder
+        .ClearProviders()
+        .AddOpenTelemetryLogging(otelResourceBuilder)
+    )
     .Build();
 
 var workReceiverService = host.Services.GetService<WorkReceiverService>()!;
