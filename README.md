@@ -60,7 +60,17 @@ Compose will build the `WebClient` and `Worker` images, so the entire process ca
 
 `docker compose up`
 
-TODO:
+## Kubernetes
+
+### Prerequisites
+
+* [RabbitMQ Operator](https://www.rabbitmq.com/kubernetes/operator/operator-overview.html)
+
+### Deployment
+
+Once the prerequisites are running on the cluster, the system can be deployed with `kubectl -k ./.k8s` which will apply the kustomize file in the directory. This will deploy all the required components. Note that the Web and Worker deployments might restart while the RabbitMQ operator deploys the RabbitMQ cluster.
+
+# TODO:
 1. ~~Run services on docker~~
-2. Run services on kubernetes
+2. ~~Run services on kubernetes~~
 3. Get kubernetes to autoscale based on worker queue depth (using KEDA?)

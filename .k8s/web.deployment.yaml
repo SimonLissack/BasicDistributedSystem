@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bds-web
+  namespace: basicdistributedsystem
+spec:
+  selector:
+    matchLabels:
+      app: bds-web
+  template:
+    metadata:
+      labels:
+        app: bds-web
+    spec:
+      containers:
+        - name: bds-web
+          image: ghcr.io/simonlissack/basicdistributedsystemweb:main
+          resources:
+            limits:
+              memory: "20Mi"
+              cpu: "50m"
+          ports:
+            - name: web
+              containerPort: 5000
+          env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: Development
+            - name: ASPNETCORE_URLS
+              value: http://+:5000
+            - name: RabbitMqConfiguration__WorkQueueName
+              value: bms_work_queue
+            - name: RabbitMqConfiguration__ExchangeName
+              value: bms_exchange
+            - name: RabbitMqConfiguration__HostName
+              value: rabbitmq-bds.basicdistributedsystem
+            - name: RabbitMqConfiguration__PortNumber
+              value: "5672"
+            - name: RabbitMqConfiguration__Username
+              valueFrom:
+                secretKeyRef:
+                  name: rabbitmq-bds-default-user
+                  key: username
+            - name: RabbitMqConfiguration__Password
+              valueFrom:
+                secretKeyRef:
+                  name: rabbitmq-bds-default-user
+                  key: password
+
+

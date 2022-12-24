@@ -1,0 +1,7 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- bds.namespace.yaml
+- bds.rabbitmqcluster.yaml
+- web.deployment.yaml
+- worker.deployment.yaml

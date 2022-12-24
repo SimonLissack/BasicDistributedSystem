@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bds-worker
+  namespace: basicdistributedsystem
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: bds-worker
+  template:
+    metadata:
+      labels:
+        app: bds-worker
+    spec:
+      containers:
+        - name: bds-worker
+          image: ghcr.io/simonlissack/basicdistributedsystemworker:main
+          imagePullPolicy: Always
+          resources:
+            limits:
+              memory: "20Mi"
+              cpu: "50m"
+          env:
+            - name: RabbitMqConfiguration__WorkQueueName
+              value: bms_work_queue
+            - name: RabbitMqConfiguration__ExchangeName
+              value: bms_exchange
+            - name: RabbitMqConfiguration__HostName
+              value: rabbitmq-bds.basicdistributedsystem
+            - name: RabbitMqConfiguration__PortNumber
+              value: "5672"
+            - name: RabbitMqConfiguration__UserName
+              valueFrom:
+                secretKeyRef:
+                  name: rabbitmq-bds-default-user
+                  key: username
+            - name: RabbitMqConfiguration__Password
+              valueFrom:
+                secretKeyRef:
+                  name: rabbitmq-bds-default-user
+                  key: password
+
+
