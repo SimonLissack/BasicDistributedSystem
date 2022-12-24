@@ -1,6 +1,11 @@
 using Infrastructure.Messaging.RabbitMq;
+using OpenTelemetry.Logs;
+using OpenTelemetry.Resources;
 using WebClient;
 using WebClient.Services;
+
+const string ServiceName = "bds-web";
+var otelResourceBuilder = ResourceBuilder.CreateDefault().AddService(ServiceName);
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,7 +17,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Logging.ClearProviders();
-builder.Logging.AddConsole();
+builder.Logging.AddOpenTelemetry(o => o.AddConsoleExporter().SetResourceBuilder(otelResourceBuilder));
 
 builder.Configuration
     .SetBasePath(builder.Environment.ContentRootPath)
@@ -32,10 +37,6 @@ builder.Services
     .AddSingleton<IPingRepository>(new InMemoryPingRepository())
     .AddTransient<IWorkRequestPublisherService, WorkRequestPublisherService>()
     .AddHostedService<WorkResponseConsumerHostedService>();
-
-Console.WriteLine($"[RabbitMQ] Host: {rabbitMqConfig.HostName}:{rabbitMqConfig.PortNumber}");
-Console.WriteLine($"[RabbitMQ] Exchange name: {rabbitMqConfig.ExchangeName}");
-Console.WriteLine($"[RabbitMQ] Work queue name: {rabbitMqConfig.WorkQueueName}");
 
 var app = builder.Build();
 

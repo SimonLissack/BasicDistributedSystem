@@ -27,6 +27,10 @@ public class WorkResponseConsumerHostedService : IHostedService
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
+        _logger.LogInformation("[RabbitMQ] Host: {HostName}:{PortNumber}", _rabbitMqConfiguration.HostName, _rabbitMqConfiguration.PortNumber);
+        _logger.LogInformation("[RabbitMQ] Exchange name: {ExchangeName}", _rabbitMqConfiguration.ExchangeName);
+        _logger.LogInformation("[RabbitMQ] Work queue name: {WorkQueueName}", _rabbitMqConfiguration.WorkQueueName);
+
         var channel = await _channelFactory.GetChannel();
 
         channel.QueueDeclare(
