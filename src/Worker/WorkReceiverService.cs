@@ -11,11 +11,13 @@ public class WorkReceiverService
 {
     readonly RabbitMqConfiguration _rabbitMqConfiguration;
     readonly IRabbitMqChannelFactory _rabbitMqChannelFactory;
+    readonly ConsoleCancellationTokenSourceFactory _cancellationTokenSourceFactory;
 
-    public WorkReceiverService(RabbitMqConfiguration rabbitMqConfiguration, IRabbitMqChannelFactory rabbitMqChannelFactory)
+    public WorkReceiverService(RabbitMqConfiguration rabbitMqConfiguration, IRabbitMqChannelFactory rabbitMqChannelFactory, ConsoleCancellationTokenSourceFactory cancellationTokenSourceFactory)
     {
         _rabbitMqConfiguration = rabbitMqConfiguration;
         _rabbitMqChannelFactory = rabbitMqChannelFactory;
+        _cancellationTokenSourceFactory = cancellationTokenSourceFactory;
     }
 
     public async Task StartAsync()
@@ -23,6 +25,8 @@ public class WorkReceiverService
         Console.WriteLine($"Host:\t{_rabbitMqConfiguration.HostName}:{_rabbitMqConfiguration.PortNumber}");
         Console.WriteLine($"Queue:\t{_rabbitMqConfiguration.WorkQueueName}");
         Console.WriteLine($"Exchange:\t{_rabbitMqConfiguration.ExchangeName}");
+
+        var cancellationToken = _cancellationTokenSourceFactory.Create();
 
         var channel = await _rabbitMqChannelFactory.GetChannel();
 
@@ -66,5 +70,7 @@ public class WorkReceiverService
         };
 
         channel.BasicConsume(_rabbitMqConfiguration.WorkQueueName, false, consumer);
+
+        await cancellationToken.WaitUntilCancelled();
     }
 }

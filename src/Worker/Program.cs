@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Worker;
 
 var host = ConfigureHost();
@@ -21,14 +22,13 @@ IHost ConfigureHost() => Host.CreateDefaultBuilder(args)
             serviceCollection
                 .AddSingleton(rabbitMqConfig)
                 .InstallRabbitMqInfrastructure()
-                .AddSingleton<WorkReceiverService>();
+                .AddSingleton<WorkReceiverService>()
+                .AddTransient<ConsoleCancellationTokenSourceFactory>();
         }
-    ).Build();
-
-var cancellationToken = CancellationTokenExtensions.CreateConsoleCancellationToken();
+    )
+    .ConfigureLogging(builder => builder.AddSimpleConsole())
+    .Build();
 
 var workReceiverService = host.Services.GetService<WorkReceiverService>()!;
 
 await workReceiverService.StartAsync();
-
-await cancellationToken.WaitUntilCancelled();
