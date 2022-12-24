@@ -29,9 +29,16 @@ public class WorkReceiverService
         var cancellationToken = _cancellationTokenSourceFactory.Create();
 
         var channel = await _rabbitMqChannelFactory.GetChannel();
+        var consumer = CreateConsumer(channel);
 
         channel.BasicQos(0, 1, false);
+        channel.BasicConsume(_rabbitMqConfiguration.WorkQueueName, false, consumer);
 
+        await cancellationToken.WaitUntilCancelled();
+    }
+
+    AsyncEventingBasicConsumer CreateConsumer(IModel channel)
+    {
         var consumer = new AsyncEventingBasicConsumer(channel);
 
         consumer.Received += async (_, ea) =>
@@ -69,8 +76,6 @@ public class WorkReceiverService
             void Ack() => channel.BasicAck(ea.DeliveryTag, false);
         };
 
-        channel.BasicConsume(_rabbitMqConfiguration.WorkQueueName, false, consumer);
-
-        await cancellationToken.WaitUntilCancelled();
+        return consumer;
     }
 }
