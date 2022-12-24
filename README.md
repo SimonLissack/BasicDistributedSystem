@@ -74,3 +74,4 @@ Once the prerequisites are running on the cluster, the system can be deployed wi
 1. ~~Run services on docker~~
 2. ~~Run services on kubernetes~~
 3. Get kubernetes to autoscale based on worker queue depth (using KEDA?)
+4. Add telemetry
