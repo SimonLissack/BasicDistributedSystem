@@ -26,9 +26,9 @@ public class WorkReceiverService
     public async Task StartAsync()
     {
         _logger.LogInformation("Starting worker");
-        _logger.LogInformation("Host:\t{HostName}:{PortNumber}", _rabbitMqConfiguration.HostName, _rabbitMqConfiguration.PortNumber);
-        _logger.LogInformation("Queue:\t{WorkQueueName}", _rabbitMqConfiguration.WorkQueueName);
-        _logger.LogInformation("Exchange:\t{ExchangeName}", _rabbitMqConfiguration.ExchangeName);
+        _logger.LogInformation("Host: {HostName}:{PortNumber}", _rabbitMqConfiguration.HostName, _rabbitMqConfiguration.PortNumber);
+        _logger.LogInformation("Queue: {WorkQueueName}", _rabbitMqConfiguration.WorkQueueName);
+        _logger.LogInformation("Exchange: {ExchangeName}", _rabbitMqConfiguration.ExchangeName);
 
         var cancellationToken = _cancellationTokenSourceFactory.Create();
 
