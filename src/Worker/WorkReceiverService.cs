@@ -2,43 +2,38 @@ using System.Net.Mime;
 using Domain.Shared;
 using Domain.Shared.Models;
 using Infrastructure.Messaging.RabbitMq;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
 namespace Worker;
 
-public class WorkReceiverService
+public class WorkReceiverService : IHostedService
 {
     readonly ILogger<WorkReceiverService> _logger;
     readonly RabbitMqConfiguration _rabbitMqConfiguration;
     readonly IRabbitMqChannelFactory _rabbitMqChannelFactory;
-    readonly ConsoleCancellationTokenSourceFactory _cancellationTokenSourceFactory;
 
-    public WorkReceiverService(ILogger<WorkReceiverService> logger, RabbitMqConfiguration rabbitMqConfiguration, IRabbitMqChannelFactory rabbitMqChannelFactory, ConsoleCancellationTokenSourceFactory cancellationTokenSourceFactory)
+    public WorkReceiverService(ILogger<WorkReceiverService> logger, RabbitMqConfiguration rabbitMqConfiguration, IRabbitMqChannelFactory rabbitMqChannelFactory)
     {
         _logger = logger;
         _rabbitMqConfiguration = rabbitMqConfiguration;
         _rabbitMqChannelFactory = rabbitMqChannelFactory;
-        _cancellationTokenSourceFactory = cancellationTokenSourceFactory;
     }
 
-    public async Task StartAsync()
+    public async Task StartAsync(CancellationToken cancellationToken)
     {
         _logger.LogInformation("Starting worker");
         _logger.LogInformation("Host: {HostName}:{PortNumber}", _rabbitMqConfiguration.HostName, _rabbitMqConfiguration.PortNumber);
         _logger.LogInformation("Queue: {WorkQueueName}", _rabbitMqConfiguration.WorkQueueName);
         _logger.LogInformation("Exchange: {ExchangeName}", _rabbitMqConfiguration.ExchangeName);
 
-        var cancellationToken = _cancellationTokenSourceFactory.Create();
-
         var channel = await _rabbitMqChannelFactory.GetChannel();
         var consumer = CreateConsumer(channel);
 
         channel.BasicQos(0, 1, false);
         channel.BasicConsume(_rabbitMqConfiguration.WorkQueueName, false, consumer);
-
-        await cancellationToken.WaitUntilCancelled();
     }
 
     AsyncEventingBasicConsumer CreateConsumer(IModel channel)
@@ -81,5 +76,11 @@ public class WorkReceiverService
         };
 
         return consumer;
+    }
+
+    public Task StopAsync(CancellationToken cancellationToken)
+    {
+        _logger.LogInformation("Stopping {ServiceName}", nameof(WorkReceiverService));
+        return Task.CompletedTask;
     }
 }

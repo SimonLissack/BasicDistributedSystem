@@ -10,9 +10,7 @@ using Worker;
 var otelResourceBuilder = ResourceBuilder.CreateDefault()
     .AddEnvironmentVariableDetector();
 
-var host = ConfigureHost();
-
-IHost ConfigureHost() => Host.CreateDefaultBuilder(args)
+var host = Host.CreateDefaultBuilder(args)
     .ConfigureHostConfiguration(c => c
         .SetBasePath(Environment.CurrentDirectory)
         .AddEnvironmentVariables()
@@ -25,7 +23,7 @@ IHost ConfigureHost() => Host.CreateDefaultBuilder(args)
             serviceCollection
                 .AddSingleton(rabbitMqConfig)
                 .InstallRabbitMqInfrastructure()
-                .AddSingleton<WorkReceiverService>()
+                .AddHostedService<WorkReceiverService>()
                 .AddTransient<ConsoleCancellationTokenSourceFactory>();
         }
     )
@@ -35,6 +33,6 @@ IHost ConfigureHost() => Host.CreateDefaultBuilder(args)
     )
     .Build();
 
-var workReceiverService = host.Services.GetService<WorkReceiverService>()!;
+var cancellationToken = host.Services.GetService<ConsoleCancellationTokenSourceFactory>()!.Create().Token;
 
-await workReceiverService.StartAsync();
+await host.RunAsync(cancellationToken);
