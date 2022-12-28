@@ -10,28 +10,32 @@ using Worker;
 var otelResourceBuilder = ResourceBuilder.CreateDefault()
     .AddEnvironmentVariableDetector();
 
-var host = Host.CreateDefaultBuilder(args)
-    .ConfigureHostConfiguration(c => c
-        .SetBasePath(Environment.CurrentDirectory)
-        .AddEnvironmentVariables()
-        .AddJsonFile("appsettings.json", true)
-    ).ConfigureServices((hostContext, serviceCollection) =>
-        {
-            var rabbitMqConfig = new RabbitMqConfiguration();
-            hostContext.Configuration.GetSection(nameof(RabbitMqConfiguration)).Bind(rabbitMqConfig);
+var hostBuilder = Host.CreateDefaultBuilder(args);
 
-            serviceCollection
-                .AddSingleton(rabbitMqConfig)
-                .InstallRabbitMqInfrastructure()
-                .AddHostedService<WorkReceiverService>()
-                .AddTransient<ConsoleCancellationTokenSourceFactory>();
-        }
-    )
-    .ConfigureLogging(builder => builder
-        .ClearProviders()
-        .AddOpenTelemetryLogging(otelResourceBuilder)
-    )
-    .Build();
+hostBuilder.ConfigureHostConfiguration(c => c
+    .SetBasePath(Environment.CurrentDirectory)
+    .AddEnvironmentVariables()
+    .AddJsonFile("appsettings.json", true)
+);
+
+hostBuilder.ConfigureServices((hostContext, serviceCollection) =>
+{
+    var rabbitMqConfig = new RabbitMqConfiguration();
+    hostContext.Configuration.GetSection(nameof(RabbitMqConfiguration)).Bind(rabbitMqConfig);
+
+    serviceCollection
+        .AddSingleton(rabbitMqConfig)
+        .InstallRabbitMqInfrastructure()
+        .AddHostedService<WorkReceiverService>()
+        .AddTransient<ConsoleCancellationTokenSourceFactory>();
+});
+
+hostBuilder.ConfigureLogging(builder => builder
+    .ClearProviders()
+    .AddOpenTelemetryLogging(otelResourceBuilder)
+);
+
+var host = hostBuilder.Build();
 
 var cancellationToken = host.Services.GetService<ConsoleCancellationTokenSourceFactory>()!.Create().Token;
 
