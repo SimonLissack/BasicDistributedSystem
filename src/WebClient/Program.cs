@@ -1,11 +1,8 @@
 using Infrastructure.Messaging.RabbitMq;
 using Infrastructure.Telemetry;
-using OpenTelemetry.Resources;
+using OpenTelemetry;
 using WebClient;
 using WebClient.Services;
-
-var otelResourceBuilder = ResourceBuilder.CreateDefault()
-    .AddEnvironmentVariableDetector();
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,7 +15,7 @@ builder.Services.AddSwaggerGen();
 
 builder.Logging
     .ClearProviders()
-    .AddOpenTelemetryLogging(otelResourceBuilder);
+    .AddOpenTelemetryLogging();
 
 builder.Configuration
     .SetBasePath(builder.Environment.ContentRootPath)
@@ -38,6 +35,9 @@ builder.Services
     .AddSingleton<IPingRepository>(new InMemoryPingRepository())
     .AddTransient<IWorkRequestPublisherService, WorkRequestPublisherService>()
     .AddHostedService<WorkResponseConsumerHostedService>();
+
+builder.Services
+    .AddOpenTelemetry();
 
 var app = builder.Build();
 

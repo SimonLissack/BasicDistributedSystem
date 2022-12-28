@@ -4,11 +4,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using OpenTelemetry.Resources;
+using OpenTelemetry;
 using Worker;
-
-var otelResourceBuilder = ResourceBuilder.CreateDefault()
-    .AddEnvironmentVariableDetector();
 
 var hostBuilder = Host.CreateDefaultBuilder(args);
 
@@ -28,11 +25,14 @@ hostBuilder.ConfigureServices((hostContext, serviceCollection) =>
         .InstallRabbitMqInfrastructure()
         .AddHostedService<WorkReceiverService>()
         .AddTransient<ConsoleCancellationTokenSourceFactory>();
+
+    serviceCollection
+        .AddOpenTelemetry();
 });
 
 hostBuilder.ConfigureLogging(builder => builder
     .ClearProviders()
-    .AddOpenTelemetryLogging(otelResourceBuilder)
+    .AddOpenTelemetryLogging()
 );
 
 var host = hostBuilder.Build();
