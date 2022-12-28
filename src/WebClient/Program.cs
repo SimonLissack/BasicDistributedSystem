@@ -4,8 +4,8 @@ using OpenTelemetry.Resources;
 using WebClient;
 using WebClient.Services;
 
-const string serviceName = "bds-web";
-var otelResourceBuilder = ResourceBuilder.CreateDefault().AddService(serviceName);
+var otelResourceBuilder = ResourceBuilder.CreateDefault()
+    .AddEnvironmentVariableDetector();
 
 var builder = WebApplication.CreateBuilder(args);
 

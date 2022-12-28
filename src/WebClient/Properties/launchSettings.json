@@ -19,7 +19,8 @@
         "ASPNETCORE_ENVIRONMENT": "Development",
         "RabbitMqConfiguration__WorkQueueName": "bms_work_queue",
         "RabbitMqConfiguration__ExchangeName": "bms_exchange",
-        "RabbitMqConfiguration__HostName": "localhost"
+        "RabbitMqConfiguration__HostName": "localhost",
+        "OTEL_SERVICE_NAME": "bds-web"
       }
     }
   }

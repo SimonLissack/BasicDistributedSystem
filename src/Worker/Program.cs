@@ -7,8 +7,8 @@ using Microsoft.Extensions.Logging;
 using OpenTelemetry.Resources;
 using Worker;
 
-const string serviceName = "bds-worker";
-var otelResourceBuilder = ResourceBuilder.CreateDefault().AddService(serviceName);
+var otelResourceBuilder = ResourceBuilder.CreateDefault()
+    .AddEnvironmentVariableDetector();
 
 var host = ConfigureHost();
 
