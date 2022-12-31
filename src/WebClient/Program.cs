@@ -33,7 +33,7 @@ builder.Services
     .InstallRabbitMqInfrastructure()
     .AddSingleton(rabbitMqConfig)
     .AddSingleton(webClientConfiguration)
-    .AddSingleton<IPingRepository>(new InMemoryPingRepository())
+    .AddSingleton<IPingRepository, InMemoryPingRepository>()
     .AddTransient<IWorkRequestPublisherService, WorkRequestPublisherService>()
     .AddHostedService<WorkResponseConsumerHostedService>();
 
