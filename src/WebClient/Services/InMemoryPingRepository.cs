@@ -26,7 +26,7 @@ public class InMemoryPingRepository : IPingRepository
     public bool TryGetModel(Guid id, out PingModel? pingModel)
     {
         using var activity = TelemetryConstants.ActivitySource.StartActivity($"{GetType().Name} get");
-        activity?.SetTag("ping.id", id.ToString());
+        activity?.SetTag("ping.id", id);
 
         return _pings.TryGetValue(id, out pingModel);
     }
@@ -41,7 +41,7 @@ public class InMemoryPingRepository : IPingRepository
     public PingModel? DeleteModel(Guid id)
     {
         using var activity = TelemetryConstants.ActivitySource.StartActivity($"{GetType().Name} delete");
-        activity?.SetTag("ping.id", id.ToString());
+        activity?.SetTag("ping.id", id);
 
         _pings.Remove(id, out var model);
         return model;
