@@ -1,7 +1,9 @@
+using System.Diagnostics;
 using System.Net.Mime;
 using Domain.Shared;
 using Domain.Shared.Models;
 using Infrastructure.Messaging.RabbitMq;
+using Infrastructure.Telemetry;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using WebClient.Models;
@@ -45,6 +47,10 @@ public class WorkResponseConsumerHostedService : IHostedService
 
         consumer.Received += (_, ea) =>
         {
+            var parentContext = ea.BasicProperties.ExtractPropagationContext();
+
+            using var activity = TelemetryConstants.ActivitySource.StartActivity($"{nameof(WorkResponseConsumerHostedService)} receive", ActivityKind.Consumer, parentContext);
+
             _logger.LogInformation(
                 "Received message from response queue {ResponseQueueName} Content type: {ContentType} Type: {Type}",
                 _webClientConfiguration.ResponseQueueName,
@@ -90,9 +96,12 @@ public class WorkResponseConsumerHostedService : IHostedService
 
     void UpdateModel(Guid id, Action<PingModel> update)
     {
+        using var activity = TelemetryConstants.ActivitySource.StartActivity();
+
         if (_pingRepository.TryGetModel(id, out var pingModel))
         {
             update(pingModel!);
+            _pingRepository.SaveModel(pingModel!);
             return;
         }
         _logger.LogWarning("Could not find model with id {Id}", id);
