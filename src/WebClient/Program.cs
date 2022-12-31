@@ -1,6 +1,7 @@
 using Infrastructure.Messaging.RabbitMq;
 using Infrastructure.Telemetry;
 using OpenTelemetry;
+using OpenTelemetry.Trace;
 using WebClient;
 using WebClient.Services;
 
@@ -37,7 +38,12 @@ builder.Services
     .AddHostedService<WorkResponseConsumerHostedService>();
 
 builder.Services
-    .AddOpenTelemetry();
+    .AddOpenTelemetry()
+    .WithTracing(b => b
+        .AddAspNetCoreInstrumentation()
+        .AddJaegerExporter()
+        .AddSource(TelemetryConstants.AppSource)
+    ).StartWithHost();
 
 var app = builder.Build();
 
