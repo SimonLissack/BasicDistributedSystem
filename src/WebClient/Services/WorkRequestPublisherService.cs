@@ -1,6 +1,7 @@
 using Domain.Shared;
 using Domain.Shared.Models;
 using Infrastructure.Messaging.RabbitMq;
+using Infrastructure.Telemetry;
 using RabbitMQ.Client;
 
 namespace WebClient.Services;
@@ -27,9 +28,14 @@ public class WorkRequestPublisherService : IWorkRequestPublisherService
 
     public async Task PublishWorkRequest(Guid id, int delayInSeconds)
     {
+        using var activity = TelemetryConstants.ActivitySource.StartActivity($"{_configuration.WorkQueueName} send");
+        activity?.AddTag("ping.id", id);
+
         _logger.LogInformation("Publishing work request for {Id}", id);
         var channel = await _channelFactory.GetChannel();
         var properties = channel.CreateJsonBasicProperties<RequestWork>();
+
+        properties.InjectPropagationValues(activity);
 
         var body = new RequestWork
         {

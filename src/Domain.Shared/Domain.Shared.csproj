@@ -6,4 +6,8 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\Infrastructure.Telemetry\Infrastructure.Telemetry.csproj" />
+    </ItemGroup>
+
 </Project>
