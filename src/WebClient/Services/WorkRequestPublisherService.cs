@@ -35,7 +35,7 @@ public class WorkRequestPublisherService : IWorkRequestPublisherService
         var channel = await _channelFactory.GetChannel();
         var properties = channel.CreateJsonBasicProperties<RequestWork>();
 
-        properties.InjectPropagationValues(activity);
+        properties.InjectPropagationContext(activity);
 
         var body = new RequestWork
         {

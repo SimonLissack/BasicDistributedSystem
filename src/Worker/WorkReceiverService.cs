@@ -1,7 +1,9 @@
+using System.Diagnostics;
 using System.Net.Mime;
 using Domain.Shared;
 using Domain.Shared.Models;
 using Infrastructure.Messaging.RabbitMq;
+using Infrastructure.Telemetry;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
@@ -42,6 +44,11 @@ public class WorkReceiverService : IHostedService
 
         consumer.Received += async (_, ea) =>
         {
+            var parentContext = ea.BasicProperties.ExtractPropagationContext();
+
+            using var activity = TelemetryConstants.ActivitySource.StartActivity($"{nameof(WorkReceiverService)} receive", ActivityKind.Consumer, parentContext);
+            activity?.AddMessagingTags(_rabbitMqConfiguration, ea.BasicProperties.ReplyTo);
+
             _logger.LogInformation("Message received");
             if (ea.BasicProperties is not { ContentType: MediaTypeNames.Application.Json, Type: nameof(RequestWork) } && string.IsNullOrEmpty(ea.BasicProperties.ReplyTo))
             {
@@ -58,10 +65,7 @@ public class WorkReceiverService : IHostedService
                 AcceptedAt = DateTime.UtcNow
             });
 
-            var delayInMilliseconds = body.DelayInSeconds >= 0 ? body.DelayInSeconds * 1000 : 0;
-
-            _logger.LogInformation("Waiting for {DelayInMilliseconds}ms", delayInMilliseconds);
-            await Task.Delay(delayInMilliseconds);
+            await DoWork(body.DelayInSeconds);
 
             channel.ReplyToMessage(_rabbitMqConfiguration, ea.BasicProperties.ReplyTo, new ProcessingCompletedResponse
             {
@@ -76,6 +80,16 @@ public class WorkReceiverService : IHostedService
         };
 
         return consumer;
+    }
+
+    async Task DoWork(int delayInSeconds)
+    {
+        using var activity = TelemetryConstants.ActivitySource.StartActivity($"{nameof(WorkReceiverService)} working");
+
+        var delayInMilliseconds = delayInSeconds >= 0 ? delayInSeconds * 1000 : 0;
+
+        _logger.LogInformation("Waiting for {DelayInMilliseconds}ms", delayInMilliseconds);
+        await Task.Delay(delayInMilliseconds);
     }
 
     public Task StopAsync(CancellationToken cancellationToken)
