@@ -1,5 +1,4 @@
 using System.Collections.Concurrent;
-using System.Diagnostics;
 using Infrastructure.Telemetry;
 using WebClient.Models;
 
