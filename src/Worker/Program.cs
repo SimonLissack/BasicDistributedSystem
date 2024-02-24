@@ -4,7 +4,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using OpenTelemetry;
 using Worker;
 
 var hostBuilder = Host.CreateDefaultBuilder(args);
@@ -17,11 +16,11 @@ hostBuilder.ConfigureHostConfiguration(c => c
 
 hostBuilder.ConfigureServices((hostContext, serviceCollection) =>
 {
-    var rabbitMqConfig = new RabbitMqConfiguration();
-    hostContext.Configuration.GetSection(nameof(RabbitMqConfiguration)).Bind(rabbitMqConfig);
+    serviceCollection
+        .AddOptions<RabbitMqConfiguration>()
+        .Bind(hostContext.Configuration.GetSection(RabbitMqConfiguration.SectionName));
 
     serviceCollection
-        .AddSingleton(rabbitMqConfig)
         .InstallRabbitMqInfrastructure()
         .AddHostedService<WorkReceiverService>()
         .AddTransient<ConsoleCancellationTokenSourceFactory>();

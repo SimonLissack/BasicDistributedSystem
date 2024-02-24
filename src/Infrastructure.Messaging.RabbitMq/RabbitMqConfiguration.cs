@@ -2,6 +2,8 @@
 
 public class RabbitMqConfiguration
 {
+    public const string SectionName = nameof(RabbitMqConfiguration);
+
     public string HostName { get; set; } = null!;
     public int PortNumber { get; set; } = 5672; // RabbitMQ default
     public string WorkQueueName { get; set; } = null!;

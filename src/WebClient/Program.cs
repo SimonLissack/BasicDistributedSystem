@@ -23,15 +23,16 @@ builder.Configuration
     .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", true)
     .AddEnvironmentVariables();
 
-var rabbitMqConfig = new RabbitMqConfiguration();
-builder.Configuration.GetSection(nameof(RabbitMqConfiguration)).Bind(rabbitMqConfig);
-var webClientConfiguration = new WebClientConfiguration();
-builder.Configuration.GetSection(nameof(WebClientConfiguration)).Bind(webClientConfiguration);
+builder.Services
+    .AddOptions<RabbitMqConfiguration>()
+    .Bind(builder.Configuration.GetSection(RabbitMqConfiguration.SectionName));
+
+builder.Services
+    .AddOptions<WebClientConfiguration>()
+    .Bind(builder.Configuration.GetSection(WebClientConfiguration.SectionName));
 
 builder.Services
     .InstallRabbitMqInfrastructure()
-    .AddSingleton(rabbitMqConfig)
-    .AddSingleton(webClientConfiguration)
     .AddSingleton<IPingRepository, InMemoryPingRepository>()
     .AddTransient<IWorkRequestPublisherService, WorkRequestPublisherService>()
     .AddHostedService<WorkResponseConsumerHostedService>();

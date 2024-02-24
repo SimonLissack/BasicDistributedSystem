@@ -2,6 +2,7 @@ using Domain.Shared;
 using Domain.Shared.Models;
 using Infrastructure.Messaging.RabbitMq;
 using Infrastructure.Telemetry;
+using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
 
 namespace WebClient.Services;
@@ -18,12 +19,12 @@ public class WorkRequestPublisherService : IWorkRequestPublisherService
     readonly RabbitMqConfiguration _configuration;
     readonly WebClientConfiguration _webClientConfiguration;
 
-    public WorkRequestPublisherService(ILogger<WorkRequestPublisherService> logger, IRabbitMqChannelFactory channelFactory, RabbitMqConfiguration configuration, WebClientConfiguration webClientConfiguration)
+    public WorkRequestPublisherService(ILogger<WorkRequestPublisherService> logger, IRabbitMqChannelFactory channelFactory, IOptions<RabbitMqConfiguration> configuration, IOptions<WebClientConfiguration> webClientConfiguration)
     {
         _logger = logger;
         _channelFactory = channelFactory;
-        _configuration = configuration;
-        _webClientConfiguration = webClientConfiguration;
+        _configuration = configuration.Value;
+        _webClientConfiguration = webClientConfiguration.Value;
     }
 
     public async Task<string?> PublishWorkRequest(Guid id, int delayInSeconds)

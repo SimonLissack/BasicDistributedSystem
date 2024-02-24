@@ -4,6 +4,7 @@ using Domain.Shared;
 using Domain.Shared.Models;
 using Infrastructure.Messaging.RabbitMq;
 using Infrastructure.Telemetry;
+using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using WebClient.Models;
@@ -18,13 +19,13 @@ public class WorkResponseConsumerHostedService : IHostedService
     readonly WebClientConfiguration _webClientConfiguration;
     readonly RabbitMqConfiguration _rabbitMqConfiguration;
 
-    public WorkResponseConsumerHostedService(ILogger<WorkResponseConsumerHostedService> logger, IRabbitMqChannelFactory channelFactory, IPingRepository pingRepository, WebClientConfiguration webClientConfiguration, RabbitMqConfiguration rabbitMqConfiguration)
+    public WorkResponseConsumerHostedService(ILogger<WorkResponseConsumerHostedService> logger, IRabbitMqChannelFactory channelFactory, IPingRepository pingRepository, IOptions<WebClientConfiguration> webClientConfiguration, IOptions<RabbitMqConfiguration> rabbitMqConfiguration)
     {
         _logger = logger;
         _channelFactory = channelFactory;
         _pingRepository = pingRepository;
-        _webClientConfiguration = webClientConfiguration;
-        _rabbitMqConfiguration = rabbitMqConfiguration;
+        _webClientConfiguration = webClientConfiguration.Value;
+        _rabbitMqConfiguration = rabbitMqConfiguration.Value;
     }
 
     public async Task StartAsync(CancellationToken cancellationToken)

@@ -6,6 +6,7 @@ using Infrastructure.Messaging.RabbitMq;
 using Infrastructure.Telemetry;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
@@ -17,10 +18,10 @@ public class WorkReceiverService : IHostedService
     readonly RabbitMqConfiguration _rabbitMqConfiguration;
     readonly IRabbitMqChannelFactory _rabbitMqChannelFactory;
 
-    public WorkReceiverService(ILogger<WorkReceiverService> logger, RabbitMqConfiguration rabbitMqConfiguration, IRabbitMqChannelFactory rabbitMqChannelFactory)
+    public WorkReceiverService(ILogger<WorkReceiverService> logger, IOptions<RabbitMqConfiguration> rabbitMqConfiguration, IRabbitMqChannelFactory rabbitMqChannelFactory)
     {
         _logger = logger;
-        _rabbitMqConfiguration = rabbitMqConfiguration;
+        _rabbitMqConfiguration = rabbitMqConfiguration.Value;
         _rabbitMqChannelFactory = rabbitMqChannelFactory;
     }
 

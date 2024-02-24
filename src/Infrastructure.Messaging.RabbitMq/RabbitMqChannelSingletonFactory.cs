@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;
 
@@ -15,10 +16,10 @@ public class RabbitMqChannelSingletonFactory : IRabbitMqChannelFactory
     readonly RabbitMqConfiguration _configuration;
     IModel? _channel;
 
-    public RabbitMqChannelSingletonFactory(ILogger<RabbitMqChannelSingletonFactory> logger, RabbitMqConfiguration configuration)
+    public RabbitMqChannelSingletonFactory(ILogger<RabbitMqChannelSingletonFactory> logger, IOptions<RabbitMqConfiguration> configuration)
     {
         _logger = logger;
-        _configuration = configuration;
+        _configuration = configuration.Value;
     }
 
     public async Task<IModel> GetChannel()
