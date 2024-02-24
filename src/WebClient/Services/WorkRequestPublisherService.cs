@@ -8,7 +8,7 @@ namespace WebClient.Services;
 
 public interface IWorkRequestPublisherService
 {
-    Task PublishWorkRequest(Guid id, int delayInSeconds);
+    Task<string?> PublishWorkRequest(Guid id, int delayInSeconds);
 }
 
 public class WorkRequestPublisherService : IWorkRequestPublisherService
@@ -26,7 +26,7 @@ public class WorkRequestPublisherService : IWorkRequestPublisherService
         _webClientConfiguration = webClientConfiguration;
     }
 
-    public async Task PublishWorkRequest(Guid id, int delayInSeconds)
+    public async Task<string?> PublishWorkRequest(Guid id, int delayInSeconds)
     {
         using var activity = TelemetryConstants.ActivitySource.StartActivity($"{_configuration.WorkQueueName} send");
         activity?.AddTag("ping.id", id);
@@ -51,5 +51,7 @@ public class WorkRequestPublisherService : IWorkRequestPublisherService
             properties,
             body
         );
+
+        return activity?.TraceId.ToString();
     }
 }

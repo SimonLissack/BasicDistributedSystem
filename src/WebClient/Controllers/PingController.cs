@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Primitives;
 using WebClient.Models;
 using WebClient.Services;
 
@@ -35,7 +36,7 @@ public class PingController : ControllerBase
     }
 
     [HttpPost]
-    public IActionResult Ping(int delayInSeconds)
+    public async Task<IActionResult> Ping(int delayInSeconds)
     {
         var ping = new PingModel
         {
@@ -46,7 +47,12 @@ public class PingController : ControllerBase
 
         _pingRepository.SaveModel(ping);
 
-        _publisherService.PublishWorkRequest(ping.Id, ping.DelayInSeconds);
+        var traceId = await _publisherService.PublishWorkRequest(ping.Id, ping.DelayInSeconds);
+
+        if (traceId is not null)
+        {
+            Response.Headers.Add("x-trace-id", new StringValues(traceId));
+        }
 
         return Ok(ping);
     }
