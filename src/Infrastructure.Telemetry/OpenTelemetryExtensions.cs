@@ -19,16 +19,16 @@ public static class OpenTelemetryExtensions
     {
         services
             .AddOpenTelemetry()
-            .ConfigureResource(r => r.AddAttributes(new []
+            .ConfigureResource(r => r.AddAttributes(new[]
             {
                 new KeyValuePair<string, object>("host.name", Environment.MachineName),
                 new KeyValuePair<string, object>("deployment.environment", environmentName)
             }))
             .WithTracing(b => b
-                .AddJaegerExporter()
+                .AddZipkinExporter()
                 .AddSource(TelemetryConstants.AppSource)
                 .WithCustomTracing(tracingConfiguration)
-            ).StartWithHost();
+            );
 
         return services;
     }
