@@ -3,6 +3,8 @@ using Infrastructure.Messaging.RabbitMq;
 using Infrastructure.Telemetry;
 using RabbitMQ.Client;
 
+namespace Worker;
+
 public static class ChannelExtensions
 {
     public static void ReplyToMessage<T>(this IModel channel, RabbitMqConfiguration configuration, string queueName, T message)
