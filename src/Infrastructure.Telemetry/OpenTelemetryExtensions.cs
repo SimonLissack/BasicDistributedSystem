@@ -25,7 +25,7 @@ public static class OpenTelemetryExtensions
                 new KeyValuePair<string, object>("deployment.environment", environmentName)
             }))
             .WithTracing(b => b
-                .AddZipkinExporter()
+                .AddZipkinExporter(c => c.Endpoint = new Uri("http://localhost:9411/api/v2/spans"))
                 .AddSource(TelemetryConstants.AppSource)
                 .WithCustomTracing(tracingConfiguration)
             );
