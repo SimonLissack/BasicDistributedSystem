@@ -70,6 +70,10 @@ Compose will build the `WebClient` and `Worker` images, so the entire process ca
 
 Once the prerequisites are running on the cluster, the system can be deployed with `kubectl -k ./.k8s` which will apply the kustomize file in the directory. This will deploy all the required components. Note that the Web and Worker deployments might restart while the RabbitMQ operator deploys the RabbitMQ cluster.
 
+# Telemetry
+
+All telemetry goes via the [OpenTelemetry collecter](https://opentelemetry.io/docs/collector/). Run the telemetry stack with `docker compose -f .metrics/docker-compose.yml up -d`.
+
 # TODO:
 1. ~~Run services on docker~~
 2. ~~Run services on kubernetes~~
