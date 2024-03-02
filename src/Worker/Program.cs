@@ -18,9 +18,7 @@ hostBuilder.ConfigureHostConfiguration(c => c
 hostBuilder.ConfigureServices((hostContext, serviceCollection) =>
 {
     serviceCollection
-        .Configure<RabbitMqOptions>(hostContext.Configuration.GetSection(RabbitMqOptions.SectionName));
-
-    serviceCollection
+        .Configure<RabbitMqOptions>(hostContext.Configuration.GetSection(RabbitMqOptions.SectionName))
         .AddInfrastructure()
         .InstallRabbitMqInfrastructure()
         .AddHostedService<WorkReceiverService>()

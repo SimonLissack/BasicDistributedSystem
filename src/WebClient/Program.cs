@@ -25,12 +25,8 @@ builder.Configuration
     .AddEnvironmentVariables();
 
 builder.Services
-    .Configure<RabbitMqOptions>(builder.Configuration.GetSection(RabbitMqOptions.SectionName));
-
-builder.Services
-    .Configure<WebClientOptions>(builder.Configuration.GetSection(WebClientOptions.SectionName));
-
-builder.Services
+    .Configure<RabbitMqOptions>(builder.Configuration.GetSection(RabbitMqOptions.SectionName))
+    .Configure<WebClientOptions>(builder.Configuration.GetSection(WebClientOptions.SectionName))
     .AddInfrastructure()
     .InstallRabbitMqInfrastructure()
     .AddSingleton<IPingRepository, InMemoryPingRepository>()
