@@ -24,12 +24,10 @@ builder.Configuration
     .AddEnvironmentVariables();
 
 builder.Services
-    .AddOptions<RabbitMqOptions>()
-    .Bind(builder.Configuration.GetSection(RabbitMqOptions.SectionName));
+    .Configure<RabbitMqOptions>(builder.Configuration.GetSection(RabbitMqOptions.SectionName));
 
 builder.Services
-    .AddOptions<WebClientOptions>()
-    .Bind(builder.Configuration.GetSection(WebClientOptions.SectionName));
+    .Configure<WebClientOptions>(builder.Configuration.GetSection(WebClientOptions.SectionName));
 
 builder.Services
     .InstallRabbitMqInfrastructure()
