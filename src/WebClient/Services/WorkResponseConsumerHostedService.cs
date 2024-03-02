@@ -16,33 +16,33 @@ public class WorkResponseConsumerHostedService : IHostedService
     readonly ILogger<WorkResponseConsumerHostedService> _logger;
     readonly IRabbitMqChannelFactory _channelFactory;
     readonly IPingRepository _pingRepository;
-    readonly WebClientConfiguration _webClientConfiguration;
-    readonly RabbitMqConfiguration _rabbitMqConfiguration;
+    readonly WebClientOptions _webClientOptions;
+    readonly RabbitMqOptions _rabbitMqOptions;
 
-    public WorkResponseConsumerHostedService(ILogger<WorkResponseConsumerHostedService> logger, IRabbitMqChannelFactory channelFactory, IPingRepository pingRepository, IOptions<WebClientConfiguration> webClientConfiguration, IOptions<RabbitMqConfiguration> rabbitMqConfiguration)
+    public WorkResponseConsumerHostedService(ILogger<WorkResponseConsumerHostedService> logger, IRabbitMqChannelFactory channelFactory, IPingRepository pingRepository, IOptions<WebClientOptions> webClientConfiguration, IOptions<RabbitMqOptions> rabbitMqConfiguration)
     {
         _logger = logger;
         _channelFactory = channelFactory;
         _pingRepository = pingRepository;
-        _webClientConfiguration = webClientConfiguration.Value;
-        _rabbitMqConfiguration = rabbitMqConfiguration.Value;
+        _webClientOptions = webClientConfiguration.Value;
+        _rabbitMqOptions = rabbitMqConfiguration.Value;
     }
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        _logger.LogInformation("[RabbitMQ] Host: {HostName}:{PortNumber}", _rabbitMqConfiguration.HostName, _rabbitMqConfiguration.PortNumber);
-        _logger.LogInformation("[RabbitMQ] Exchange name: {ExchangeName}", _rabbitMqConfiguration.ExchangeName);
-        _logger.LogInformation("[RabbitMQ] Work queue name: {WorkQueueName}", _rabbitMqConfiguration.WorkQueueName);
+        _logger.LogInformation("[RabbitMQ] Host: {HostName}:{PortNumber}", _rabbitMqOptions.HostName, _rabbitMqOptions.PortNumber);
+        _logger.LogInformation("[RabbitMQ] Exchange name: {ExchangeName}", _rabbitMqOptions.ExchangeName);
+        _logger.LogInformation("[RabbitMQ] Work queue name: {WorkQueueName}", _rabbitMqOptions.WorkQueueName);
 
         var channel = await _channelFactory.GetChannel();
 
         channel.QueueDeclare(
-            _webClientConfiguration.ResponseQueueName,
+            _webClientOptions.ResponseQueueName,
             false,
             false
         );
 
-        channel.QueueBind(_webClientConfiguration.ResponseQueueName, _rabbitMqConfiguration.ExchangeName, _webClientConfiguration.ResponseQueueName);
+        channel.QueueBind(_webClientOptions.ResponseQueueName, _rabbitMqOptions.ExchangeName, _webClientOptions.ResponseQueueName);
 
         var consumer = new AsyncEventingBasicConsumer(channel);
 
@@ -54,7 +54,7 @@ public class WorkResponseConsumerHostedService : IHostedService
 
             _logger.LogInformation(
                 "Received message from response queue {ResponseQueueName} Content type: {ContentType} Type: {Type}",
-                _webClientConfiguration.ResponseQueueName,
+                _webClientOptions.ResponseQueueName,
                 ea.BasicProperties.ContentType,
                 ea.BasicProperties.Type
             );
@@ -89,7 +89,7 @@ public class WorkResponseConsumerHostedService : IHostedService
         };
 
         channel.BasicConsume(
-            _webClientConfiguration.ResponseQueueName,
+            _webClientOptions.ResponseQueueName,
             consumer: consumer,
             autoAck: true
         );
@@ -110,10 +110,10 @@ public class WorkResponseConsumerHostedService : IHostedService
 
     public async Task StopAsync(CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Cleaning up queue {ResponseQueueName}", _webClientConfiguration.ResponseQueueName);
+        _logger.LogInformation("Cleaning up queue {ResponseQueueName}", _webClientOptions.ResponseQueueName);
 
         var channel = await _channelFactory.GetChannel();
 
-        channel.QueueDelete(_webClientConfiguration.ResponseQueueName, false, false);
+        channel.QueueDelete(_webClientOptions.ResponseQueueName, false, false);
     }
 }

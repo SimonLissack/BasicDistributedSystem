@@ -45,7 +45,7 @@ public static class RabbitMqTelemetryExtensions
             ? new[] { Encoding.UTF8.GetString((byte[])value) }
             : Enumerable.Empty<string>();
 
-    public static void AddMessagingTags(this Activity? activity, RabbitMqConfiguration configuration, string destinationQueue)
+    public static void AddMessagingTags(this Activity? activity, RabbitMqOptions options, string destinationQueue)
     {
         // These tags are added demonstrating the semantic conventions of the OpenTelemetry messaging specification
         // See:
@@ -53,7 +53,7 @@ public static class RabbitMqTelemetryExtensions
         //   * https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/semantic_conventions/messaging.md#rabbitmq
         activity?.SetTag("messaging.system", "rabbitmq");
         activity?.SetTag("messaging.destination_kind", "queue");
-        activity?.SetTag("messaging.destination", configuration.ExchangeName);
+        activity?.SetTag("messaging.destination", options.ExchangeName);
         activity?.SetTag("messaging.rabbitmq.routing_key", destinationQueue);
     }
 }

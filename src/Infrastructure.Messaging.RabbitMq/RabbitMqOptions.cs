@@ -1,8 +1,8 @@
 ﻿namespace Infrastructure.Messaging.RabbitMq;
 
-public class RabbitMqConfiguration
+public class RabbitMqOptions
 {
-    public const string SectionName = nameof(RabbitMqConfiguration);
+    public const string SectionName = nameof(RabbitMqOptions);
 
     public string HostName { get; set; } = null!;
     public int PortNumber { get; set; } = 5672; // RabbitMQ default

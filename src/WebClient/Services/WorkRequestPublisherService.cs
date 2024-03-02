@@ -16,20 +16,20 @@ public class WorkRequestPublisherService : IWorkRequestPublisherService
 {
     readonly ILogger<WorkRequestPublisherService> _logger;
     readonly IRabbitMqChannelFactory _channelFactory;
-    readonly RabbitMqConfiguration _configuration;
-    readonly WebClientConfiguration _webClientConfiguration;
+    readonly RabbitMqOptions _options;
+    readonly WebClientOptions _webClientOptions;
 
-    public WorkRequestPublisherService(ILogger<WorkRequestPublisherService> logger, IRabbitMqChannelFactory channelFactory, IOptions<RabbitMqConfiguration> configuration, IOptions<WebClientConfiguration> webClientConfiguration)
+    public WorkRequestPublisherService(ILogger<WorkRequestPublisherService> logger, IRabbitMqChannelFactory channelFactory, IOptions<RabbitMqOptions> configuration, IOptions<WebClientOptions> webClientConfiguration)
     {
         _logger = logger;
         _channelFactory = channelFactory;
-        _configuration = configuration.Value;
-        _webClientConfiguration = webClientConfiguration.Value;
+        _options = configuration.Value;
+        _webClientOptions = webClientConfiguration.Value;
     }
 
     public async Task<string?> PublishWorkRequest(Guid id, int delayInSeconds)
     {
-        using var activity = TelemetryConstants.ActivitySource.StartActivity($"{_configuration.WorkQueueName} send");
+        using var activity = TelemetryConstants.ActivitySource.StartActivity($"{_options.WorkQueueName} send");
         activity?.AddTag("ping.id", id);
 
         _logger.LogInformation("Publishing work request for {Id}", id);
@@ -44,10 +44,10 @@ public class WorkRequestPublisherService : IWorkRequestPublisherService
             DelayInSeconds = delayInSeconds
         }.SerializeToMessage();
 
-        properties.ReplyTo = _webClientConfiguration.ResponseQueueName;
+        properties.ReplyTo = _webClientOptions.ResponseQueueName;
 
         channel.BasicPublish(
-            _configuration.ExchangeName,
+            _options.ExchangeName,
             nameof(RequestWork),
             properties,
             body

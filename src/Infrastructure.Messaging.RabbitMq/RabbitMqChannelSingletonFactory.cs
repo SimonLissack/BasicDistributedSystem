@@ -13,13 +13,13 @@ public interface IRabbitMqChannelFactory
 public class RabbitMqChannelSingletonFactory : IRabbitMqChannelFactory
 {
     readonly ILogger<RabbitMqChannelSingletonFactory> _logger;
-    readonly RabbitMqConfiguration _configuration;
+    readonly RabbitMqOptions _options;
     IModel? _channel;
 
-    public RabbitMqChannelSingletonFactory(ILogger<RabbitMqChannelSingletonFactory> logger, IOptions<RabbitMqConfiguration> configuration)
+    public RabbitMqChannelSingletonFactory(ILogger<RabbitMqChannelSingletonFactory> logger, IOptions<RabbitMqOptions> configuration)
     {
         _logger = logger;
-        _configuration = configuration.Value;
+        _options = configuration.Value;
     }
 
     public async Task<IModel> GetChannel()
@@ -31,21 +31,21 @@ public class RabbitMqChannelSingletonFactory : IRabbitMqChannelFactory
 
         var factory = new ConnectionFactory
         {
-            HostName = _configuration.HostName,
-            Port = _configuration.PortNumber,
+            HostName = _options.HostName,
+            Port = _options.PortNumber,
             DispatchConsumersAsync = true,
-            UserName = _configuration.UserName ?? ConnectionFactory.DefaultPass,
-            Password = _configuration.Password ?? ConnectionFactory.DefaultPass
+            UserName = _options.UserName ?? ConnectionFactory.DefaultPass,
+            Password = _options.Password ?? ConnectionFactory.DefaultPass
         };
 
         var connection = await ConnectAndRetryOnFailure(factory);
         _channel = connection.CreateModel();
 
-        _channel.ExchangeDeclare(_configuration.ExchangeName, ExchangeType.Direct);
+        _channel.ExchangeDeclare(_options.ExchangeName, ExchangeType.Direct);
         // Always guarantee the work queue exists
-        _channel.QueueDeclare(_configuration.WorkQueueName, exclusive: false, autoDelete: false);
+        _channel.QueueDeclare(_options.WorkQueueName, exclusive: false, autoDelete: false);
 
-        _channel.QueueBind(_configuration.WorkQueueName, _configuration.ExchangeName, RoutingKeys.WorkRequestRoutingKeys);
+        _channel.QueueBind(_options.WorkQueueName, _options.ExchangeName, RoutingKeys.WorkRequestRoutingKeys);
 
         return _channel;
     }

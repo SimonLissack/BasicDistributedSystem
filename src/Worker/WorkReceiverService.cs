@@ -15,28 +15,28 @@ namespace Worker;
 public class WorkReceiverService : IHostedService
 {
     readonly ILogger<WorkReceiverService> _logger;
-    readonly RabbitMqConfiguration _rabbitMqConfiguration;
+    readonly RabbitMqOptions _rabbitMqOptions;
     readonly IRabbitMqChannelFactory _rabbitMqChannelFactory;
 
-    public WorkReceiverService(ILogger<WorkReceiverService> logger, IOptions<RabbitMqConfiguration> rabbitMqConfiguration, IRabbitMqChannelFactory rabbitMqChannelFactory)
+    public WorkReceiverService(ILogger<WorkReceiverService> logger, IOptions<RabbitMqOptions> rabbitMqConfiguration, IRabbitMqChannelFactory rabbitMqChannelFactory)
     {
         _logger = logger;
-        _rabbitMqConfiguration = rabbitMqConfiguration.Value;
+        _rabbitMqOptions = rabbitMqConfiguration.Value;
         _rabbitMqChannelFactory = rabbitMqChannelFactory;
     }
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
         _logger.LogInformation("Starting worker");
-        _logger.LogInformation("Host: {HostName}:{PortNumber}", _rabbitMqConfiguration.HostName, _rabbitMqConfiguration.PortNumber);
-        _logger.LogInformation("Queue: {WorkQueueName}", _rabbitMqConfiguration.WorkQueueName);
-        _logger.LogInformation("Exchange: {ExchangeName}", _rabbitMqConfiguration.ExchangeName);
+        _logger.LogInformation("Host: {HostName}:{PortNumber}", _rabbitMqOptions.HostName, _rabbitMqOptions.PortNumber);
+        _logger.LogInformation("Queue: {WorkQueueName}", _rabbitMqOptions.WorkQueueName);
+        _logger.LogInformation("Exchange: {ExchangeName}", _rabbitMqOptions.ExchangeName);
 
         var channel = await _rabbitMqChannelFactory.GetChannel();
         var consumer = CreateConsumer(channel);
 
         channel.BasicQos(0, 1, false);
-        channel.BasicConsume(_rabbitMqConfiguration.WorkQueueName, false, consumer);
+        channel.BasicConsume(_rabbitMqOptions.WorkQueueName, false, consumer);
     }
 
     AsyncEventingBasicConsumer CreateConsumer(IModel channel)
@@ -48,7 +48,7 @@ public class WorkReceiverService : IHostedService
             var parentContext = ea.BasicProperties.ExtractPropagationContext();
 
             using var activity = TelemetryConstants.ActivitySource.StartActivity($"{nameof(WorkReceiverService)} receive", ActivityKind.Consumer, parentContext);
-            activity?.AddMessagingTags(_rabbitMqConfiguration, ea.BasicProperties.ReplyTo);
+            activity?.AddMessagingTags(_rabbitMqOptions, ea.BasicProperties.ReplyTo);
 
             _logger.LogInformation("Message received");
             if (ea.BasicProperties is not { ContentType: MediaTypeNames.Application.Json, Type: nameof(RequestWork) } && string.IsNullOrEmpty(ea.BasicProperties.ReplyTo))
@@ -60,7 +60,7 @@ public class WorkReceiverService : IHostedService
 
             var body = ea.Body.ToArray().DeserializeMessage<RequestWork>();
             _logger.LogInformation("Processing message for {BodyId}", body.Id);
-            channel.ReplyToMessage(_rabbitMqConfiguration, ea.BasicProperties.ReplyTo, new AcceptedResponse
+            channel.ReplyToMessage(_rabbitMqOptions, ea.BasicProperties.ReplyTo, new AcceptedResponse
             {
                 Id = body.Id,
                 AcceptedAt = DateTime.UtcNow
@@ -68,7 +68,7 @@ public class WorkReceiverService : IHostedService
 
             await DoWork(body.DelayInSeconds);
 
-            channel.ReplyToMessage(_rabbitMqConfiguration, ea.BasicProperties.ReplyTo, new ProcessingCompletedResponse
+            channel.ReplyToMessage(_rabbitMqOptions, ea.BasicProperties.ReplyTo, new ProcessingCompletedResponse
             {
                 Id = body.Id,
                 CompletedAt = DateTime.UtcNow
