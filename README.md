@@ -26,7 +26,7 @@ The entire application makes use of a single, direct exchange. There are two typ
 
 This is the queue which the `WebClients` will publish work requests to and the `Workers` will consume to pick up work.
 
-#### Reply queues
+### Reply queues
 
 When the `WebClients` send messages, it will add a queue name to the `replyTo` field of the message properties. This allows the worker to send updates to the correct web client.
 
