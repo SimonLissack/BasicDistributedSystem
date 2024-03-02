@@ -28,7 +28,6 @@ hostBuilder.ConfigureServices((hostContext, serviceCollection) =>
 });
 
 hostBuilder.ConfigureLogging(builder => builder
-    .ClearProviders()
     .AddOpenTelemetryLogging()
 );
 

@@ -15,7 +15,6 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Logging
-    .ClearProviders()
     .AddOpenTelemetryLogging();
 
 builder.Configuration

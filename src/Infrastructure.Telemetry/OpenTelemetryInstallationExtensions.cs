@@ -12,7 +12,7 @@ public static class OpenTelemetryInstallationExtensions
 {
     public static ILoggingBuilder AddOpenTelemetryLogging(this ILoggingBuilder loggingBuilder)
     {
-        loggingBuilder.AddOpenTelemetry(o => o.AddConsoleExporter());
+        loggingBuilder.AddOpenTelemetry(o => o.AddOtlpExporter());
         return loggingBuilder;
     }
 
