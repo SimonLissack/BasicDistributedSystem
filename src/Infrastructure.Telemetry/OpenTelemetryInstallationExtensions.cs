@@ -17,9 +17,12 @@ public static class OpenTelemetryExtensions
 
     public static IServiceCollection AddOpenTelemetryStack(this IServiceCollection services, IConfiguration configuration, string environmentName, Action<TracerProviderBuilder>? tracingConfiguration = null)
     {
-        var telemetryOptions = configuration.GetSection(TelemetryOptions.SectionName).Get<TelemetryOptions>() ?? new TelemetryOptions();
+        var telemetrySection = configuration.GetSection(TelemetryOptions.SectionName);
+        var telemetryOptions = telemetrySection.Get<TelemetryOptions>() ?? new TelemetryOptions();
 
         services
+            .Configure<TelemetryOptions>(telemetrySection)
+            .AddSingleton<Instrumentation>()
             .AddOpenTelemetry()
             .ConfigureResource(r => r.AddAttributes(new[]
             {
@@ -28,7 +31,7 @@ public static class OpenTelemetryExtensions
             }))
             .WithTracing(b => b
                 .AddZipkinExporter(c => c.Endpoint = telemetryOptions.ZipkinEndpoint)
-                .AddSource(TelemetryConstants.AppSource)
+                .AddSource(telemetryOptions.ActivitySourceName)
                 .WithCustomTracing(tracingConfiguration)
             );
 
