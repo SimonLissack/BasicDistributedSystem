@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Net.Mime;
 using Domain.Shared;
 using Domain.Shared.Models;
+using Infrastructure.Abstractions;
 using Infrastructure.Messaging.RabbitMq;
 using Infrastructure.Telemetry;
 using Microsoft.Extensions.Options;
@@ -14,16 +15,28 @@ namespace WebClient.Services;
 public class WorkResponseConsumerHostedService : IHostedService
 {
     readonly ILogger<WorkResponseConsumerHostedService> _logger;
+    readonly Instrumentation _instrumentation;
     readonly IRabbitMqChannelFactory _channelFactory;
     readonly IPingRepository _pingRepository;
+    readonly ISerializationService _serializationService;
     readonly WebClientOptions _webClientOptions;
     readonly RabbitMqOptions _rabbitMqOptions;
 
-    public WorkResponseConsumerHostedService(ILogger<WorkResponseConsumerHostedService> logger, IRabbitMqChannelFactory channelFactory, IPingRepository pingRepository, IOptions<WebClientOptions> webClientConfiguration, IOptions<RabbitMqOptions> rabbitMqConfiguration)
+    public WorkResponseConsumerHostedService(
+        ILogger<WorkResponseConsumerHostedService> logger,
+        Instrumentation instrumentation,
+        IRabbitMqChannelFactory channelFactory,
+        IPingRepository pingRepository,
+        IOptions<WebClientOptions> webClientConfiguration,
+        IOptions<RabbitMqOptions> rabbitMqConfiguration,
+        ISerializationService serializationService
+        )
     {
         _logger = logger;
+        _instrumentation = instrumentation;
         _channelFactory = channelFactory;
         _pingRepository = pingRepository;
+        _serializationService = serializationService;
         _webClientOptions = webClientConfiguration.Value;
         _rabbitMqOptions = rabbitMqConfiguration.Value;
     }
@@ -50,7 +63,7 @@ public class WorkResponseConsumerHostedService : IHostedService
         {
             var parentContext = ea.BasicProperties.ExtractPropagationContext();
 
-            using var activity = TelemetryConstants.ActivitySource.StartActivity($"{nameof(WorkResponseConsumerHostedService)} receive", ActivityKind.Consumer, parentContext);
+            using var activity = _instrumentation.ActivitySource.StartActivity($"{nameof(WorkResponseConsumerHostedService)} receive", ActivityKind.Consumer, parentContext);
 
             _logger.LogInformation(
                 "Received message from response queue {ResponseQueueName} Content type: {ContentType} Type: {Type}",
@@ -64,11 +77,11 @@ public class WorkResponseConsumerHostedService : IHostedService
                 switch (ea.BasicProperties.Type)
                 {
                     case nameof(AcceptedResponse):
-                        var acceptedResponse = ea.Body.ToArray().DeserializeMessage<AcceptedResponse>();
+                        var acceptedResponse = _serializationService.DeserializeMessage<AcceptedResponse>(ea.Body.ToArray());
                         UpdateModel(acceptedResponse.Id, m => m.AcceptedByWorkerAt = acceptedResponse.AcceptedAt);
                         break;
                     case nameof(ProcessingCompletedResponse):
-                        var processingCompletedResponse = ea.Body.ToArray().DeserializeMessage<ProcessingCompletedResponse>();
+                        var processingCompletedResponse = _serializationService.DeserializeMessage<ProcessingCompletedResponse>(ea.Body.ToArray());
                         UpdateModel(processingCompletedResponse.Id, m =>
                         {
                             m.CompletedByWorkerAt = processingCompletedResponse.CompletedAt;
@@ -97,7 +110,7 @@ public class WorkResponseConsumerHostedService : IHostedService
 
     void UpdateModel(Guid id, Action<PingModel> update)
     {
-        using var activity = TelemetryConstants.ActivitySource.StartActivity();
+        using var activity = _instrumentation.ActivitySource.StartActivity();
 
         if (_pingRepository.TryGetModel(id, out var pingModel))
         {

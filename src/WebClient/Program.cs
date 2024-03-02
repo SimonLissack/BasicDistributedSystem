@@ -1,3 +1,4 @@
+using Infrastructure.DependencyInjection;
 using Infrastructure.Messaging.RabbitMq;
 using Infrastructure.Telemetry;
 using OpenTelemetry.Trace;
@@ -30,6 +31,7 @@ builder.Services
     .Configure<WebClientOptions>(builder.Configuration.GetSection(WebClientOptions.SectionName));
 
 builder.Services
+    .AddInfrastructure()
     .InstallRabbitMqInfrastructure()
     .AddSingleton<IPingRepository, InMemoryPingRepository>()
     .AddTransient<IWorkRequestPublisherService, WorkRequestPublisherService>()

@@ -1,4 +1,5 @@
-﻿using Infrastructure.Messaging.RabbitMq;
+﻿using Infrastructure.DependencyInjection;
+using Infrastructure.Messaging.RabbitMq;
 using Infrastructure.Telemetry;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -20,6 +21,7 @@ hostBuilder.ConfigureServices((hostContext, serviceCollection) =>
         .Configure<RabbitMqOptions>(hostContext.Configuration.GetSection(RabbitMqOptions.SectionName));
 
     serviceCollection
+        .AddInfrastructure()
         .InstallRabbitMqInfrastructure()
         .AddHostedService<WorkReceiverService>()
         .AddTransient<ConsoleCancellationTokenSourceFactory>();

@@ -18,7 +18,7 @@
     <ItemGroup>
       <ProjectReference Include="..\Domain.Shared\Domain.Shared.csproj" />
       <ProjectReference Include="..\Infrastructure.Messaging.RabbitMq\Infrastructure.Messaging.RabbitMq.csproj" />
-      <ProjectReference Include="..\Infrastructure.Telemetry\Infrastructure.Telemetry.csproj" />
+      <ProjectReference Include="..\Infrastructure\Infrastructure.csproj" />
     </ItemGroup>
 
     <ItemGroup>

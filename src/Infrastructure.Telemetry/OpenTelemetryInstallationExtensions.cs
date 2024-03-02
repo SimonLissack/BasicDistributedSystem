@@ -7,7 +7,7 @@ using OpenTelemetry.Trace;
 
 namespace Infrastructure.Telemetry;
 
-public static class OpenTelemetryExtensions
+public static class OpenTelemetryInstallationExtensions
 {
     public static ILoggingBuilder AddOpenTelemetryLogging(this ILoggingBuilder loggingBuilder)
     {

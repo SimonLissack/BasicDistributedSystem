@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Net.Mime;
 using Domain.Shared;
 using Domain.Shared.Models;
+using Infrastructure.Abstractions;
 using Infrastructure.Messaging.RabbitMq;
 using Infrastructure.Telemetry;
 using Microsoft.Extensions.Hosting;
@@ -15,14 +16,18 @@ namespace Worker;
 public class WorkReceiverService : IHostedService
 {
     readonly ILogger<WorkReceiverService> _logger;
+    readonly Instrumentation _instrumentation;
     readonly RabbitMqOptions _rabbitMqOptions;
     readonly IRabbitMqChannelFactory _rabbitMqChannelFactory;
+    readonly ISerializationService _serializationService;
 
-    public WorkReceiverService(ILogger<WorkReceiverService> logger, IOptions<RabbitMqOptions> rabbitMqConfiguration, IRabbitMqChannelFactory rabbitMqChannelFactory)
+    public WorkReceiverService(ILogger<WorkReceiverService> logger, Instrumentation instrumentation, IOptions<RabbitMqOptions> rabbitMqConfiguration, IRabbitMqChannelFactory rabbitMqChannelFactory, ISerializationService serializationService)
     {
         _logger = logger;
+        _instrumentation = instrumentation;
         _rabbitMqOptions = rabbitMqConfiguration.Value;
         _rabbitMqChannelFactory = rabbitMqChannelFactory;
+        _serializationService = serializationService;
     }
 
     public async Task StartAsync(CancellationToken cancellationToken)
@@ -47,7 +52,7 @@ public class WorkReceiverService : IHostedService
         {
             var parentContext = ea.BasicProperties.ExtractPropagationContext();
 
-            using var activity = TelemetryConstants.ActivitySource.StartActivity($"{nameof(WorkReceiverService)} receive", ActivityKind.Consumer, parentContext);
+            using var activity = _instrumentation.ActivitySource.StartActivity($"{nameof(WorkReceiverService)} receive", ActivityKind.Consumer, parentContext);
             activity?.AddMessagingTags(_rabbitMqOptions, ea.BasicProperties.ReplyTo);
 
             _logger.LogInformation("Message received");
@@ -58,17 +63,21 @@ public class WorkReceiverService : IHostedService
                 return;
             }
 
-            var body = ea.Body.ToArray().DeserializeMessage<RequestWork>();
+            var body = _serializationService.DeserializeMessage<RequestWork>(ea.Body.ToArray());
             _logger.LogInformation("Processing message for {BodyId}", body.Id);
-            channel.ReplyToMessage(_rabbitMqOptions, ea.BasicProperties.ReplyTo, new AcceptedResponse
+
+            activity?.AddEvent(new ActivityEvent("Sending accepted response"));
+            ReplyToMessage(channel, ea.BasicProperties.ReplyTo, new AcceptedResponse
             {
                 Id = body.Id,
                 AcceptedAt = DateTime.UtcNow
             });
 
+            activity?.AddEvent(new ActivityEvent("Starting work"));
             await DoWork(body.DelayInSeconds);
 
-            channel.ReplyToMessage(_rabbitMqOptions, ea.BasicProperties.ReplyTo, new ProcessingCompletedResponse
+            activity?.AddEvent(new ActivityEvent("Sending completed response"));
+            ReplyToMessage(channel, ea.BasicProperties.ReplyTo, new ProcessingCompletedResponse
             {
                 Id = body.Id,
                 CompletedAt = DateTime.UtcNow
@@ -85,7 +94,7 @@ public class WorkReceiverService : IHostedService
 
     async Task DoWork(int delayInSeconds)
     {
-        using var activity = TelemetryConstants.ActivitySource.StartActivity($"{nameof(WorkReceiverService)} working");
+        using var activity = _instrumentation.ActivitySource.StartActivity($"{nameof(WorkReceiverService)} working");
 
         var delayInMilliseconds = delayInSeconds >= 0 ? delayInSeconds * 1000 : 0;
 
@@ -97,5 +106,15 @@ public class WorkReceiverService : IHostedService
     {
         _logger.LogInformation("Stopping {ServiceName}", nameof(WorkReceiverService));
         return Task.CompletedTask;
+    }
+
+    void ReplyToMessage<T>(IModel channel, string queueName, T message)
+    {
+        using var activity = _instrumentation.ActivitySource.StartActivity();
+
+        var properties = channel.CreateJsonBasicProperties<T>();
+        properties.InjectPropagationContext(activity);
+
+        channel.BasicPublish(_rabbitMqOptions.ExchangeName, queueName, properties, _serializationService.SerializeToMessage(message));
     }
 }

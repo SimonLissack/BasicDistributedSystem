@@ -1,6 +1,5 @@
 using System.Diagnostics;
 using System.Text;
-using Infrastructure.Telemetry;
 using OpenTelemetry;
 using OpenTelemetry.Context.Propagation;
 using RabbitMQ.Client;
