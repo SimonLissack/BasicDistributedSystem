@@ -20,7 +20,8 @@
         "RabbitMqOptions__WorkQueueName": "bms_work_queue",
         "RabbitMqOptions__ExchangeName": "bms_exchange",
         "RabbitMqOptions__HostName": "localhost",
-        "OTEL_SERVICE_NAME": "bds-web"
+        "OTEL_SERVICE_NAME": "bds-web",
+        "OTEL_EXPORTER_OTLP_ENDPOINT": "http://localhost:4317"
       }
     }
   }

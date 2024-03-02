@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using OpenTelemetry.Exporter;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
@@ -30,7 +31,7 @@ public static class OpenTelemetryInstallationExtensions
                 new KeyValuePair<string, object>("deployment.environment", environmentName)
             }))
             .WithTracing(b => b
-                .AddZipkinExporter(c => c.Endpoint = telemetryOptions.ZipkinEndpoint)
+                .AddOtlpExporter()
                 .AddSource(telemetryOptions.ActivitySourceName)
                 .WithCustomTracing(tracingConfiguration)
             );
