@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using OpenTelemetry.Logs;
@@ -14,8 +15,10 @@ public static class OpenTelemetryExtensions
         return loggingBuilder;
     }
 
-    public static IServiceCollection AddOpenTelemetryStack(this IServiceCollection services, string environmentName, Action<TracerProviderBuilder>? tracingConfiguration = null)
+    public static IServiceCollection AddOpenTelemetryStack(this IServiceCollection services, IConfiguration configuration, string environmentName, Action<TracerProviderBuilder>? tracingConfiguration = null)
     {
+        var telemetryOptions = configuration.GetSection(TelemetryOptions.SectionName).Get<TelemetryOptions>() ?? new TelemetryOptions();
+
         services
             .AddOpenTelemetry()
             .ConfigureResource(r => r.AddAttributes(new[]
@@ -24,7 +27,7 @@ public static class OpenTelemetryExtensions
                 new KeyValuePair<string, object>("deployment.environment", environmentName)
             }))
             .WithTracing(b => b
-                .AddZipkinExporter(c => c.Endpoint = new Uri("http://localhost:9411/api/v2/spans"))
+                .AddZipkinExporter(c => c.Endpoint = telemetryOptions.ZipkinEndpoint)
                 .AddSource(TelemetryConstants.AppSource)
                 .WithCustomTracing(tracingConfiguration)
             );

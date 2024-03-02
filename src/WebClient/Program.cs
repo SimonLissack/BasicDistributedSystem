@@ -36,6 +36,7 @@ builder.Services
     .AddHostedService<WorkResponseConsumerHostedService>();
 
 builder.Services.AddOpenTelemetryStack(
+    builder.Configuration,
     builder.Environment.EnvironmentName,
     b => b
         .AddAspNetCoreInstrumentation()

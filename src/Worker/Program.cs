@@ -24,7 +24,7 @@ hostBuilder.ConfigureServices((hostContext, serviceCollection) =>
         .AddHostedService<WorkReceiverService>()
         .AddTransient<ConsoleCancellationTokenSourceFactory>();
 
-    serviceCollection.AddOpenTelemetryStack(hostContext.HostingEnvironment.EnvironmentName);
+    serviceCollection.AddOpenTelemetryStack(hostContext.Configuration, hostContext.HostingEnvironment.EnvironmentName);
 });
 
 hostBuilder.ConfigureLogging(builder => builder
