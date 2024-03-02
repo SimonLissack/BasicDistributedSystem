@@ -75,8 +75,8 @@ public class WorkReceiverService : IHostedService
 
             activity?.AddEvent(new ActivityEvent("Starting work"));
             await DoWork(body.DelayInSeconds);
+            activity?.AddEvent(new ActivityEvent("Work complete"));
 
-            activity?.AddEvent(new ActivityEvent("Sending completed response"));
             ReplyToMessage(channel, ea.BasicProperties.ReplyTo, new ProcessingCompletedResponse
             {
                 Id = body.Id,
