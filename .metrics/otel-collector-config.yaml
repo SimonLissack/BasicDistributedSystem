@@ -7,13 +7,15 @@ receivers:
       http:
         endpoint: 0.0.0.0:4318
 exporters:
-  zipkin:
-    endpoint: http://zipkin:9411/api/v2/spans
   loki:
     endpoint: http://loki:3100/loki/api/v1/push
     default_labels_enabled:
       exporter: false
       job: true
+  otlp/tempo:
+    endpoint: http://tempo:4317
+    tls:
+      insecure: true
 processors:
   batch: {}
 service:
@@ -21,7 +23,7 @@ service:
     traces:
       receivers: [otlp]
       processors: [batch]
-      exporters: [zipkin]
+      exporters: [otlp/tempo]
     logs:
       receivers: [otlp]
       processors: [batch]
