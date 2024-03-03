@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build-worker
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build-worker
 WORKDIR /src
 
 copy . ./
